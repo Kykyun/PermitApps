@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: workpermit-db
+    environment:
+      POSTGRES_USER: ${DB_USER:-permitapp}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-permit2026secure}
+      POSTGRES_DB: ${DB_NAME:-workpermit}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U permitapp -d workpermit"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: workpermit-api
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: ${DB_USER:-permitapp}
+      DB_PASSWORD: ${DB_PASSWORD:-permit2026secure}
+      DB_NAME: ${DB_NAME:-workpermit}
+      JWT_SECRET: ${JWT_SECRET:-wp-secret-key-2026-change-in-production}
+      PORT: 5000
+      NODE_ENV: production
+    ports:
+      - "5000:5000"
+    volumes:
+      - uploads:/app/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  uploads:

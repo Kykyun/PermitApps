@@ -1,0 +1,44 @@
+﻿Downloading Web SDK...                                              6.5s
+Resolving dependencies...
+Downloading packages...
+  meta 1.17.0 (1.18.1 available)
+  win32 5.15.0 (6.0.0 available)
+Got dependencies!
+2 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+Compiling lib\main.dart for the Web...                          
+flutter : Wasm dry run 
+succeeded. Consider 
+building and testing 
+your application with 
+the `--wasm` flag. See 
+docs for more info: htt
+ps://docs.flutter.dev/p
+latform-integration/web
+/wasm
+At line:1 char:44
++ ... :Path = 
+"C:\flutter\bin;" + 
+$env:Path; flutter 
+build web 2>&1 | Out-F 
+...
++                      
+                      
+~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo     
+         : NotSpecifi  
+  ed: (Wasm dry run    
+ su...ration/web/wa    
+sm:String) [], Rem    
+oteException
+    + FullyQualifiedEr 
+   rorId : NativeComm  
+  andError
+ 
+Use --no-wasm-dry-run 
+to disable these 
+warnings.
+Font asset "CupertinoIcons.ttf" was tree-shaken, reducing it from 257628 to 1472 bytes (99.4% reduction). Tree-shaking can be disabled by providing the --no-tree-shake-icons flag when building your app.
+Font asset "MaterialIcons-Regular.otf" was tree-shaken, reducing it from 1645184 to 11184 bytes (99.3% reduction). Tree-shaking can be disabled by providing the --no-tree-shake-icons flag when building your app.
+Compiling lib\main.dart for the Web...                             59.5s
+ΓêÜ Built build\web

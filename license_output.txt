@@ -1,0 +1,85 @@
+﻿cmd : java.lang.Unsup
+portedClassVersionErr
+or: com/android/sdkli
+b/tool/sdkmanager/Sdk
+ManagerCli has been 
+compiled by a more 
+recent version of 
+the Java Runtime 
+(class file version 
+61.0), this version 
+of the Java Runtime 
+only recognizes 
+class file versions 
+up to 52.0
+At line:1 char:82
++ ... ding ascii; 
+cmd /c "type 
+$env:TEMP\yes.txt | $
+env:LOCALAPPDATA\Andr
+oi ...
++                 ~~~
+~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~
+    + CategoryInfo   
+           : NotSpe  
+  cified: (java.la   
+ ng.Unsup...ions     
+up to 52.0:Strin    
+g) [], RemoteExc    
+eption
+    + FullyQualified 
+   ErrorId : Native  
+  CommandError
+ 
+	at java.lang.ClassLo
+ader.defineClass1(Nat
+ive Method)
+	at java.lang.ClassLo
+ader.defineClass(Clas
+sLoader.java:763)
+	at java.security.Sec
+ureClassLoader.define
+Class(SecureClassLoad
+er.java:142)
+	at java.net.URLClass
+Loader.defineClass(UR
+LClassLoader.java:468
+)
+	at java.net.URLClass
+Loader.access$100(URL
+ClassLoader.java:74)
+	at java.net.URLClass
+Loader$1.run(URLClass
+Loader.java:369)
+	at java.net.URLClass
+Loader$1.run(URLClass
+Loader.java:363)
+	at java.security.Acc
+essController.doPrivi
+leged(Native Method)
+	at java.net.URLClass
+Loader.findClass(URLC
+lassLoader.java:362)
+	at java.lang.ClassLo
+ader.loadClass(ClassL
+oader.java:424)
+	at sun.misc.Launcher
+$AppClassLoader.loadC
+lass(Launcher.java:34
+9)
+	at java.lang.ClassLo
+ader.loadClass(ClassL
+oader.java:357)
+	at sun.launcher.Laun
+cherHelper.checkAndLo
+adMain(LauncherHelper
+.java:495)
+Error: A JNI error 
+has occurred, please 
+check your 
+installation and try 
+again
+Exception in thread 
+"main" 

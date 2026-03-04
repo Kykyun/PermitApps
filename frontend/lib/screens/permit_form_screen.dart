@@ -1,296 +1,110 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:intl/intl.dart';
-import '../providers/permit_provider.dart';
+import 'forms/confined_space_form.dart';
+import 'forms/hot_work_form.dart';
+import 'forms/working_at_height_form.dart';
 
-class PermitFormScreen extends StatefulWidget {
-  final int? editPermitId;
-  const PermitFormScreen({super.key, this.editPermitId});
-
-  @override
-  State<PermitFormScreen> createState() => _PermitFormScreenState();
-}
-
-class _PermitFormScreenState extends State<PermitFormScreen> {
-  final _formKey = GlobalKey<FormState>();
-  String _permitType = 'confined_space';
-  final _workDescription = TextEditingController();
-  final _workLocation = TextEditingController();
-  final _hazards = TextEditingController();
-  final _controls = TextEditingController();
-  DateTime _startDate = DateTime.now();
-  DateTime _endDate = DateTime.now().add(const Duration(days: 1));
-  bool _isLoading = false;
-  bool _submitAfterSave = false;
-
-  // PPE checkboxes
-  final Map<String, bool> _ppe = {
-    'Helmet': false,
-    'Safety Harness': false,
-    'Gas Mask': false,
-    'Gloves': false,
-    'Safety Shoes': false,
-    'Goggles': false,
-    'Ear Protection': false,
-    'Fire Retardant Clothing': false,
-  };
-
-  final _types = [
-    ('confined_space', '🕳️ Confined Space'),
-    ('working_at_height', '🪜 Working at Height'),
-    ('excavation', '⛏️ Excavation'),
-    ('electrical', '⚡ Electrical Work'),
-    ('hot_work', '🔥 Hot Work'),
-  ];
-
-  @override
-  void dispose() {
-    _workDescription.dispose();
-    _workLocation.dispose();
-    _hazards.dispose();
-    _controls.dispose();
-    super.dispose();
-  }
-
-  Future<void> _selectDate(bool isStart) async {
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: isStart ? _startDate : _endDate,
-      firstDate: DateTime.now().subtract(const Duration(days: 7)),
-      lastDate: DateTime.now().add(const Duration(days: 365)),
-      builder: (context, child) => Theme(
-        data: Theme.of(context).copyWith(
-          colorScheme: Theme.of(context).colorScheme.copyWith(
-                surface: const Color(0xFF162A3E),
-              ),
-        ),
-        child: child!,
-      ),
-    );
-    if (picked != null) {
-      setState(() {
-        if (isStart) {
-          _startDate = picked;
-          if (_endDate.isBefore(_startDate)) _endDate = _startDate.add(const Duration(days: 1));
-        } else {
-          _endDate = picked;
-        }
-      });
-    }
-  }
-
-  Future<void> _savePermit() async {
-    if (!_formKey.currentState!.validate()) return;
-
-    setState(() => _isLoading = true);
-
-    final selectedPpe = _ppe.entries.where((e) => e.value).map((e) => e.key).join(', ');
-
-    final data = {
-      'permit_type': _permitType,
-      'work_description': _workDescription.text.trim(),
-      'work_location': _workLocation.text.trim(),
-      'start_date': _startDate.toIso8601String(),
-      'end_date': _endDate.toIso8601String(),
-      'hazard_identification': _hazards.text.trim(),
-      'control_measures': _controls.text.trim(),
-      'ppe_required': selectedPpe,
-    };
-
-    final provider = context.read<PermitProvider>();
-    final permit = await provider.createPermit(data);
-
-    if (permit != null && _submitAfterSave) {
-      await provider.submitPermit(permit.id);
-    }
-
-    if (mounted) {
-      setState(() => _isLoading = false);
-      if (permit != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(_submitAfterSave ? 'Permit submitted for review!' : 'Permit saved as draft'),
-            backgroundColor: const Color(0xFF66BB6A),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-        Navigator.pop(context);
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: const Text('Failed to save permit'), backgroundColor: Colors.red.shade700, behavior: SnackBarBehavior.floating),
-        );
-      }
-    }
-  }
+class PermitFormScreen extends StatelessWidget {
+  const PermitFormScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final dateFormat = DateFormat('dd MMM yyyy');
-
     return Scaffold(
       appBar: AppBar(
-        title: const Text('New Work Permit'),
+        title: const Text('Select Permit Type'),
+        centerTitle: true,
       ),
-      body: Form(
-        key: _formKey,
-        child: ListView(
-          padding: const EdgeInsets.all(16),
+      body: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Permit Type
-            const Text('Permit Type', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+            const Text(
+              'What type of work permit do you need?',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
+            ),
             const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: _types.map((t) {
-                final selected = _permitType == t.$1;
-                return ChoiceChip(
-                  label: Text(t.$2),
-                  selected: selected,
-                  selectedColor: const Color(0xFF4FC3F7),
-                  backgroundColor: const Color(0xFF1C2F42),
-                  labelStyle: TextStyle(
-                    color: selected ? const Color(0xFF0F1923) : Colors.white70,
-                    fontWeight: selected ? FontWeight.w600 : FontWeight.normal,
-                  ),
-                  onSelected: (_) => setState(() => _permitType = t.$1),
-                );
-              }).toList(),
-            ),
-            const SizedBox(height: 20),
-
-            // Work Location
-            TextFormField(
-              controller: _workLocation,
-              decoration: const InputDecoration(
-                labelText: 'Work Location',
-                prefixIcon: Icon(Icons.location_on_outlined),
-              ),
-              validator: (v) => v?.isEmpty == true ? 'Required' : null,
-            ),
-            const SizedBox(height: 16),
-
-            // Dates
-            Row(
-              children: [
-                Expanded(
-                  child: InkWell(
-                    onTap: () => _selectDate(true),
-                    child: InputDecorator(
-                      decoration: const InputDecoration(
-                        labelText: 'Start Date',
-                        prefixIcon: Icon(Icons.calendar_today_outlined),
-                      ),
-                      child: Text(dateFormat.format(_startDate)),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: InkWell(
-                    onTap: () => _selectDate(false),
-                    child: InputDecorator(
-                      decoration: const InputDecoration(
-                        labelText: 'End Date',
-                        prefixIcon: Icon(Icons.calendar_today_outlined),
-                      ),
-                      child: Text(dateFormat.format(_endDate)),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-
-            // Work Description
-            TextFormField(
-              controller: _workDescription,
-              maxLines: 3,
-              decoration: const InputDecoration(
-                labelText: 'Work Description',
-                alignLabelWithHint: true,
-              ),
-              validator: (v) => v?.isEmpty == true ? 'Required' : null,
-            ),
-            const SizedBox(height: 16),
-
-            // Hazard Identification
-            TextFormField(
-              controller: _hazards,
-              maxLines: 3,
-              decoration: const InputDecoration(
-                labelText: 'Hazard Identification',
-                alignLabelWithHint: true,
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            // Control Measures
-            TextFormField(
-              controller: _controls,
-              maxLines: 3,
-              decoration: const InputDecoration(
-                labelText: 'Control Measures',
-                alignLabelWithHint: true,
-              ),
-            ),
-            const SizedBox(height: 20),
-
-            // PPE Required
-            const Text('PPE Required', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              runSpacing: 0,
-              children: _ppe.keys.map((ppe) {
-                return FilterChip(
-                  label: Text(ppe, style: const TextStyle(fontSize: 12)),
-                  selected: _ppe[ppe]!,
-                  selectedColor: const Color(0xFF4FC3F7).withValues(alpha: 0.3),
-                  checkmarkColor: const Color(0xFF4FC3F7),
-                  backgroundColor: const Color(0xFF1C2F42),
-                  onSelected: (v) => setState(() => _ppe[ppe] = v),
-                );
-              }).toList(),
+            const Text(
+              'Please select the permit type first before filling out the form.',
+              style: TextStyle(color: Colors.white54, fontSize: 14),
+              textAlign: TextAlign.center,
             ),
             const SizedBox(height: 32),
-
-            // Action buttons
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: _isLoading
-                        ? null
-                        : () {
-                            _submitAfterSave = false;
-                            _savePermit();
-                          },
-                    style: OutlinedButton.styleFrom(
-                      side: const BorderSide(color: Color(0xFF4FC3F7)),
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    ),
-                    child: const Text('Save Draft', style: TextStyle(color: Color(0xFF4FC3F7))),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: _isLoading
-                        ? null
-                        : () {
-                            _submitAfterSave = true;
-                            _savePermit();
-                          },
-                    child: _isLoading
-                        ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                        : const Text('Submit'),
-                  ),
-                ),
-              ],
+            _buildTypeCard(
+              context,
+              '🕳️ Confined Space',
+              'Entry into tanks, vessels, manholes, or vaults.',
+              const Color(0xFFE57373),
+              () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ConfinedSpaceForm())),
             ),
-            const SizedBox(height: 32),
+            const SizedBox(height: 16),
+            _buildTypeCard(
+              context,
+              '🔥 Hot Work',
+              'Welding, cutting, grinding, or using open flames.',
+              const Color(0xFFFFB74D),
+              () => Navigator.push(context, MaterialPageRoute(builder: (_) => const HotWorkForm())),
+            ),
+            const SizedBox(height: 16),
+            _buildTypeCard(
+              context,
+              '🪜 Working at Height',
+              'Working on roofs, scaffolding, or elevated platforms.',
+              const Color(0xFF64B5F6),
+              () => Navigator.push(context, MaterialPageRoute(builder: (_) => const WorkingAtHeightForm())),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTypeCard(BuildContext context, String title, String subtitle, Color color, VoidCallback onTap) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: const Color(0xFF1C2F42),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: const Color(0xFF2A4056)),
+          boxShadow: [
+            BoxShadow(
+              color: color.withOpacity(0.1),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: color.withOpacity(0.2),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(Icons.description, color: color, size: 28),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    subtitle,
+                    style: const TextStyle(fontSize: 13, color: Colors.white54),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.white54),
           ],
         ),
       ),

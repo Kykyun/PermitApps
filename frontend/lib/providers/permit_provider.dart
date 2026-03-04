@@ -64,6 +64,16 @@ class PermitProvider extends ChangeNotifier {
     }
   }
 
+  Future<bool> uploadDocumentBytes(int permitId, List<int> bytes, String filename) async {
+    try {
+      await _api.uploadDocumentBytes(permitId, bytes, filename);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+
   Future<bool> approvePermit(int id, {String? comments}) async {
     try {
       await _api.approvePermit(id, comments: comments);

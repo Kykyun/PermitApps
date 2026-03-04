@@ -53,17 +53,24 @@ class WorkPermitApp extends StatelessWidget {
         inputDecorationTheme: InputDecorationTheme(
           filled: true,
           fillColor: const Color(0xFF1C2F42),
+          floatingLabelStyle: const TextStyle(
+            color: Color(0xFF4FC3F7),
+            backgroundColor: Color(0xFF0F1923), // Matches Scaffold background to hide the border line
+          ),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide.none,
+            borderSide: const BorderSide(color: Color(0xFF2A4056)),
+            gapPadding: 8,
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
             borderSide: const BorderSide(color: Color(0xFF2A4056)),
+            gapPadding: 8,
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
             borderSide: const BorderSide(color: Color(0xFF4FC3F7), width: 2),
+            gapPadding: 8,
           ),
           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         ),

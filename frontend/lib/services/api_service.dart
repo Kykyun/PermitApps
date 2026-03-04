@@ -2,7 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiService {
-  static const String baseUrl = 'http://localhost:5000/api';
+  static const String baseUrl = 'http://localhost:5001/api';
   late Dio _dio;
 
   static final ApiService _instance = ApiService._internal();
@@ -74,6 +74,13 @@ class ApiService {
     for (final path in filePaths) {
       formData.files.add(MapEntry('documents', await MultipartFile.fromFile(path)));
     }
+    return _dio.post('/permits/$permitId/documents', data: formData);
+  }
+
+  Future<Response> uploadDocumentBytes(int permitId, List<int> bytes, String filename) async {
+    final formData = FormData.fromMap({
+      'documents': MultipartFile.fromBytes(bytes, filename: filename),
+    });
     return _dio.post('/permits/$permitId/documents', data: formData);
   }
 

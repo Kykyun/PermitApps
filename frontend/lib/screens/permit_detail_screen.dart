@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+import 'dart:convert';
 import '../models/permit.dart';
 import '../providers/auth_provider.dart';
 import '../providers/permit_provider.dart';
@@ -120,6 +121,85 @@ class _PermitDetailScreenState extends State<PermitDetailScreen> {
     );
   }
 
+  Widget _buildJsonOrText(String text) {
+    if (text.trim().startsWith('{') || text.trim().startsWith('[')) {
+      try {
+        final data = jsonDecode(text);
+        return _buildFormattedJson(data);
+      } catch (_) {}
+    }
+    return Text(text, style: const TextStyle(color: Colors.white70, height: 1.5));
+  }
+
+  Widget _buildFormattedJson(dynamic data, {int depth = 0}) {
+    if (data is Map) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: data.entries.map((e) {
+          return Padding(
+            padding: EdgeInsets.only(bottom: 6.0, top: 4.0, left: depth > 0 ? 12.0 : 0),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('${_formatKey(e.key.toString())}: ', style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: Color(0xFF4FC3F7))),
+                Expanded(child: _buildFormattedJson(e.value, depth: depth + 1)),
+              ],
+            ),
+          );
+        }).toList(),
+      );
+    } else if (data is List) {
+      if (data.isEmpty) return const Text('-', style: TextStyle(color: Colors.white, fontSize: 13));
+      if (data.first is Map || data.first is List) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: data.map((item) => Padding(
+            padding: const EdgeInsets.only(bottom: 4.0),
+            child: _buildFormattedJson(item, depth: depth + 1),
+          )).toList(),
+        );
+      } else {
+        return Text(data.join(', '), style: const TextStyle(color: Colors.white, fontSize: 13));
+      }
+    } else {
+      return Text(data.toString(), style: const TextStyle(color: Colors.white, fontSize: 13));
+    }
+  }
+
+  String _formatKey(String key) {
+    return key.replaceAll('_', ' ').split(' ').map((s) {
+      if (s.isEmpty) return '';
+      return s[0].toUpperCase() + s.substring(1).toLowerCase();
+    }).join(' ');
+  }
+
+  Widget _buildInfoMessage(IconData icon, String title, String msg) {
+    return Card(
+      color: const Color(0xFF162A3E),
+      margin: const EdgeInsets.only(bottom: 16),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12), side: const BorderSide(color: Color(0xFF4FC3F7), width: 1)),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            Icon(icon, color: const Color(0xFF4FC3F7), size: 28),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title, style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF4FC3F7), fontSize: 14)),
+                  const SizedBox(height: 4),
+                  Text(msg, style: const TextStyle(color: Colors.white70, fontSize: 12, height: 1.4)),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final user = context.watch<AuthProvider>().user!;
@@ -197,9 +277,9 @@ class _PermitDetailScreenState extends State<PermitDetailScreen> {
                   Text(p.workDescription, style: const TextStyle(color: Colors.white70, height: 1.5)),
                   if (p.hazardIdentification?.isNotEmpty == true) ...[
                     const SizedBox(height: 16),
-                    const Text('Hazard Identification', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                    const Text('Detailed Information / Safety Checklist', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
                     const SizedBox(height: 8),
-                    Text(p.hazardIdentification!, style: const TextStyle(color: Colors.white70, height: 1.5)),
+                    _buildJsonOrText(p.hazardIdentification!),
                   ],
                   if (p.controlMeasures?.isNotEmpty == true) ...[
                     const SizedBox(height: 16),
@@ -264,12 +344,41 @@ class _PermitDetailScreenState extends State<PermitDetailScreen> {
                   children: [
                     Text('Documents (${_documents.length})', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
                     const SizedBox(height: 8),
-                    ..._documents.map((d) => ListTile(
-                      leading: const Icon(Icons.description_outlined, color: Color(0xFF4FC3F7)),
-                      title: Text(d.documentName, style: const TextStyle(fontSize: 13)),
-                      dense: true,
-                      contentPadding: EdgeInsets.zero,
-                    )),
+                    ..._documents.map((d) {
+                      final isImage = d.fileType?.startsWith('image/') == true || d.filePath.toLowerCase().endsWith('.png') || d.filePath.toLowerCase().endsWith('.jpg') || d.filePath.toLowerCase().endsWith('.jpeg');
+                      if (isImage) {
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(d.documentName, style: const TextStyle(fontSize: 13, color: Color(0xFF4FC3F7))),
+                              const SizedBox(height: 8),
+                              Container(
+                                width: double.infinity,
+                                height: 200,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(color: const Color(0xFF2A4056)),
+                                ),
+                                clipBehavior: Clip.hardEdge,
+                                child: Image.network(
+                                  'http://localhost:5001${d.filePath}',
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) => const Center(child: Icon(Icons.broken_image, color: Colors.white54, size: 40)),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }
+                      return ListTile(
+                        leading: const Icon(Icons.description_outlined, color: Color(0xFF4FC3F7)),
+                        title: Text(d.documentName, style: const TextStyle(fontSize: 13)),
+                        dense: true,
+                        contentPadding: EdgeInsets.zero,
+                      );
+                    }),
                   ],
                 ),
               ),
@@ -298,7 +407,18 @@ class _PermitDetailScreenState extends State<PermitDetailScreen> {
             ),
           ],
 
-          // Action buttons
+          // Action buttons and Process info
+          if (p.status == 'submitted' && user.role == 'k3_officer')
+            _buildInfoMessage(Icons.pending_actions, 'Awaiting Supervisor Approval', 'The Supervisor must review and approve this permit first. Once approved, you will be able to review it.'),
+          if (p.status == 'submitted' && user.role == 'worker')
+            _buildInfoMessage(Icons.hourglass_empty, 'In Review', 'Your permit is currently being reviewed by your Supervisor.'),
+          if (p.status == 'supervisor_approved' && user.role == 'supervisor')
+            _buildInfoMessage(Icons.hourglass_empty, 'Awaiting Safety Approval', 'You have approved this permit. It is now pending Safety Officer (Ahli K3) review.'),
+          if (p.status == 'supervisor_approved' && user.role == 'worker')
+            _buildInfoMessage(Icons.hourglass_empty, 'Safety Review', 'Your Supervisor has approved. Now being reviewed by Safety Officer (Ahli K3).'),
+          if (p.status == 'approved')
+            _buildInfoMessage(Icons.print, 'Permit Approved', 'This permit is fully approved. You can now execute the work safely.'),
+
           if (canApprove || canSubmit) ...[
             const SizedBox(height: 16),
             if (canSubmit)

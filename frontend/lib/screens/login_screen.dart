@@ -268,9 +268,9 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                 prefixIcon: Icon(Icons.badge_outlined),
               ),
               items: const [
-                DropdownMenuItem(value: 'worker', child: Text('Pekerja')),
+                DropdownMenuItem(value: 'worker', child: Text('Worker')),
                 DropdownMenuItem(value: 'supervisor', child: Text('Supervisor')),
-                DropdownMenuItem(value: 'k3_officer', child: Text('Ahli K3')),
+                DropdownMenuItem(value: 'k3_officer', child: Text('Safety Officer')),
               ],
               onChanged: (v) => setState(() => _regRole = v ?? 'worker'),
             ),

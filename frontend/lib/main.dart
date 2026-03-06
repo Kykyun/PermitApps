@@ -26,7 +26,7 @@ class WorkPermitApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Work Permit System',
+      title: 'LNK StPOM - Works Permit',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,

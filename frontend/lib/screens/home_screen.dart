@@ -53,7 +53,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             const SizedBox(width: 12),
             if (isWide)
-              const Text('Work Permit System', style: TextStyle(fontWeight: FontWeight.bold)),
+              const Text('LNK StPOM - Works Permit', style: TextStyle(fontWeight: FontWeight.bold)),
           ],
         ),
         actions: [

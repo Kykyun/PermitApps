@@ -96,12 +96,12 @@ class Permit {
         return 'Draft';
       case 'submitted':
         return 'Submitted';
-      case 'supervisor_review':
-        return 'Supervisor Review';
-      case 'supervisor_approved':
-        return 'Supervisor Approved';
-      case 'k3_review':
-        return 'K3 Review';
+      case 'k3_filled':
+        return 'K3 Filled (Review By K3 Umum)';
+      case 'k3_umum_approved':
+        return 'K3 Umum Approved (Review By Mill Assistant)';
+      case 'mill_assistant_approved':
+        return 'Mill Assistant Approved (Pending Final Approval)';
       case 'approved':
         return 'Approved';
       case 'rejected':

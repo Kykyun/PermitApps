@@ -18,7 +18,7 @@ router.get('/stats', authenticate, async (req, res) => {
         const { rows } = await pool.query(`
       SELECT
         COUNT(*) FILTER (WHERE status IN ('approved', 'active')) as active,
-        COUNT(*) FILTER (WHERE status IN ('submitted', 'supervisor_review', 'supervisor_approved', 'k3_review')) as pending,
+        COUNT(*) FILTER (WHERE status IN ('submitted', 'k3_filled', 'k3_umum_approved', 'mill_assistant_approved')) as pending,
         COUNT(*) FILTER (WHERE status = 'rejected') as rejected,
         COUNT(*) FILTER (WHERE status = 'draft') as draft,
         COUNT(*) FILTER (WHERE status = 'closed') as closed,

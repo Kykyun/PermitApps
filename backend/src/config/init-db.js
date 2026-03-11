@@ -14,7 +14,7 @@ const createTables = async () => {
         email VARCHAR(150) UNIQUE NOT NULL,
         password_hash VARCHAR(255) NOT NULL,
         role VARCHAR(20) NOT NULL DEFAULT 'worker'
-          CHECK (role IN ('worker', 'supervisor', 'k3_officer', 'admin')),
+          CHECK (role IN ('worker', 'supervisor', 'k3_officer', 'k3_umum', 'mill_assistant', 'mill_manager', 'admin')),
         department VARCHAR(100),
         phone VARCHAR(20),
         created_at TIMESTAMP DEFAULT NOW(),
@@ -31,7 +31,7 @@ const createTables = async () => {
         permit_type VARCHAR(30) NOT NULL
           CHECK (permit_type IN ('confined_space', 'working_at_height', 'excavation', 'electrical', 'hot_work')),
         status VARCHAR(30) NOT NULL DEFAULT 'draft'
-          CHECK (status IN ('draft', 'submitted', 'supervisor_review', 'supervisor_approved', 'k3_review', 'approved', 'rejected', 'active', 'expired', 'closed')),
+          CHECK (status IN ('draft', 'submitted', 'k3_filled', 'k3_umum_approved', 'mill_assistant_approved', 'approved', 'rejected', 'active', 'expired', 'closed')),
         work_description TEXT NOT NULL,
         work_location VARCHAR(255) NOT NULL,
         start_date TIMESTAMP NOT NULL,
@@ -110,6 +110,9 @@ const seedDemoUsers = async () => {
             { name: 'Ahmad Pekerja', email: 'worker@demo.com', password: 'worker123', role: 'worker', department: 'Operations', phone: '0131234567' },
             { name: 'Siti Supervisor', email: 'supervisor@demo.com', password: 'supervisor123', role: 'supervisor', department: 'Operations', phone: '0141234567' },
             { name: 'Dr. Ali K3', email: 'k3@demo.com', password: 'k3123', role: 'k3_officer', department: 'Safety', phone: '0151234567' },
+            { name: 'Budi K3 Umum', email: 'k3umum@demo.com', password: 'k3umum123', role: 'k3_umum', department: 'Safety', phone: '0161234567' },
+            { name: 'Amin Assistant', email: 'mill_assistant@demo.com', password: 'assistant123', role: 'mill_assistant', department: 'Management', phone: '0171234567' },
+            { name: 'John Manager', email: 'mill_manager@demo.com', password: 'manager123', role: 'mill_manager', department: 'Management', phone: '0181234567' },
         ];
 
         for (const u of users) {

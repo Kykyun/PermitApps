@@ -6,6 +6,7 @@ import 'dashboard_screen.dart';
 import 'permit_list_screen.dart';
 import 'permit_form_screen.dart';
 import 'notification_screen.dart';
+import 'user_management_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -120,6 +121,17 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                     const PopupMenuDivider(height: 1),
+                    if (user.role == 'admin')
+                      const PopupMenuItem(
+                        value: 'users',
+                        child: Row(
+                          children: [
+                            Icon(Icons.manage_accounts_outlined, size: 18, color: Colors.white),
+                            SizedBox(width: 8),
+                            Text('Manage Users'),
+                          ],
+                        ),
+                      ),
                     const PopupMenuItem(
                       value: 'logout',
                       child: Row(
@@ -132,7 +144,11 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ],
                 );
-                if (v == 'logout') auth.logout();
+                if (v == 'logout') {
+                  auth.logout();
+                } else if (v == 'users') {
+                  Navigator.push(context, MaterialPageRoute(builder: (_) => const UserManagementScreen()));
+                }
               },
               child: Container(
                 color: Colors.transparent,

@@ -9,6 +9,7 @@ const authRoutes = require('./src/routes/auth');
 const permitRoutes = require('./src/routes/permits');
 const notificationRoutes = require('./src/routes/notifications');
 const dashboardRoutes = require('./src/routes/dashboard');
+const userRoutes = require('./src/routes/users');
 
 const app = express();
 const PORT = process.env.PORT || 5001;
@@ -27,6 +28,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/permits', permitRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/users', userRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

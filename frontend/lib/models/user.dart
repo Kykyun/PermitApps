@@ -34,6 +34,12 @@ class User {
         return 'Supervisor';
       case 'k3_officer':
         return 'Ahli K3';
+      case 'k3_umum':
+        return 'Ahli K3 Umum';
+      case 'mill_assistant':
+        return 'Mill Assistant';
+      case 'mill_manager':
+        return 'Mill Manager';
       case 'admin':
         return 'Admin';
       default:

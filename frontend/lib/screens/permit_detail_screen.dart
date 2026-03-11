@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'dart:convert';
+import 'package:file_picker/file_picker.dart' as file_picker;
 import '../models/permit.dart';
 import '../providers/auth_provider.dart';
 import '../providers/permit_provider.dart';
+import '../services/api_service.dart';
 
 class PermitDetailScreen extends StatefulWidget {
   final int permitId;
@@ -85,6 +87,42 @@ class _PermitDetailScreenState extends State<PermitDetailScreen> {
           const SnackBar(content: Text('Permit submitted for review'), backgroundColor: Color(0xFF4FC3F7), behavior: SnackBarBehavior.floating),
         );
         _loadDetail();
+      }
+    }
+  }
+
+  Future<void> _uploadDocument() async {
+    try {
+      final result = await file_picker.FilePicker.platform.pickFiles(type: file_picker.FileType.any, withData: true);
+      if (result != null && result.files.first.bytes != null) {
+        final file = result.files.first;
+        if (file.size > 5 * 1024 * 1024) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('File must be smaller than 5MB'), backgroundColor: Colors.red),
+            );
+          }
+          return;
+        }
+
+        setState(() => _actionLoading = true);
+        await context.read<PermitProvider>().uploadDocumentBytes(widget.permitId, file.bytes!, file.name);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Document uploaded successfully'), backgroundColor: Colors.green),
+          );
+          _loadDetail();
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to upload document'), backgroundColor: Colors.red),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _actionLoading = false);
       }
     }
   }
@@ -356,16 +394,37 @@ class _PermitDetailScreenState extends State<PermitDetailScreen> {
                               const SizedBox(height: 8),
                               Container(
                                 width: double.infinity,
-                                height: 200,
+                                height: 260,
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(12),
                                   border: Border.all(color: const Color(0xFF2A4056)),
                                 ),
                                 clipBehavior: Clip.hardEdge,
-                                child: Image.network(
-                                  'http://localhost:5001${d.filePath}',
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) => const Center(child: Icon(Icons.broken_image, color: Colors.white54, size: 40)),
+                                child: Column(
+                                  children: [
+                                    Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: SelectableText(
+                                        'DEBUG URL: ${ApiService.baseUrl.replaceAll('/api', '')}${d.filePath}',
+                                        style: const TextStyle(fontSize: 10, color: Colors.orange),
+                                      ),
+                                    ),
+                                    Expanded(
+                                      child: Image.network(
+                                        '${ApiService.baseUrl.replaceAll('/api', '')}${d.filePath}',
+                                        fit: BoxFit.cover,
+                                        errorBuilder: (context, error, stackTrace) => Center(
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(8.0),
+                                            child: Text('Error: $error\n$stackTrace', 
+                                              style: const TextStyle(color: Colors.redAccent, fontSize: 10),
+                                              textAlign: TextAlign.center,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ],
@@ -409,15 +468,33 @@ class _PermitDetailScreenState extends State<PermitDetailScreen> {
 
           // Action buttons and Process info
           if (p.status == 'submitted' && user.role == 'k3_officer')
-            _buildInfoMessage(Icons.pending_actions, 'Awaiting Supervisor Approval', 'The Supervisor must review and approve this permit first. Once approved, you will be able to review it.'),
-          if (p.status == 'submitted' && user.role == 'worker')
-            _buildInfoMessage(Icons.hourglass_empty, 'In Review', 'Your permit is currently being reviewed by your Supervisor.'),
-          if (p.status == 'supervisor_approved' && user.role == 'supervisor')
-            _buildInfoMessage(Icons.hourglass_empty, 'Awaiting Safety Approval', 'You have approved this permit. It is now pending Safety Officer (Ahli K3) review.'),
-          if (p.status == 'supervisor_approved' && user.role == 'worker')
-            _buildInfoMessage(Icons.hourglass_empty, 'Safety Review', 'Your Supervisor has approved. Now being reviewed by Safety Officer (Ahli K3).'),
+            _buildInfoMessage(Icons.pending_actions, 'Awaiting Ahli K3', 'Please review, fill the necessary forms, and approve to proceed.'),
+          if (p.status == 'k3_filled' && user.role == 'k3_umum')
+            _buildInfoMessage(Icons.pending_actions, 'Awaiting K3 Umum Approval', 'Review test results and approve/reject with justification.'),
+          if (p.status == 'k3_umum_approved' && user.role == 'mill_assistant')
+            _buildInfoMessage(Icons.pending_actions, 'Awaiting Mill Assistant', 'Review and approve to proceed to final step.'),
+          if (p.status == 'mill_assistant_approved' && user.role == 'mill_manager')
+            _buildInfoMessage(Icons.pending_actions, 'Awaiting Final Approval', 'Provide the final approval for this permit.'),
           if (p.status == 'approved')
             _buildInfoMessage(Icons.print, 'Permit Approved', 'This permit is fully approved. You can now execute the work safely.'),
+
+          // Upload Document Button for Ahli K3
+          if (p.status == 'submitted' && user.role == 'k3_officer') ...[
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: _actionLoading ? null : _uploadDocument,
+                icon: const Icon(Icons.upload_file),
+                label: const Text('Upload Test Results / Documents'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF4FC3F7),
+                  foregroundColor: const Color(0xFF0F1923),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                ),
+              ),
+            ),
+          ],
 
           if (canApprove || canSubmit) ...[
             const SizedBox(height: 16),
@@ -469,8 +546,10 @@ class _PermitDetailScreenState extends State<PermitDetailScreen> {
   }
 
   bool _canApprove(String role, String status) {
-    if (role == 'supervisor' && (status == 'submitted' || status == 'supervisor_review')) return true;
-    if (role == 'k3_officer' && (status == 'supervisor_approved' || status == 'k3_review')) return true;
+    if (role == 'k3_officer' && status == 'submitted') return true;
+    if (role == 'k3_umum' && status == 'k3_filled') return true;
+    if (role == 'mill_assistant' && status == 'k3_umum_approved') return true;
+    if (role == 'mill_manager' && status == 'mill_assistant_approved') return true;
     if (role == 'admin') return status != 'approved' && status != 'rejected' && status != 'draft';
     return false;
   }
@@ -511,9 +590,9 @@ class _StatusBadge extends StatelessWidget {
       case 'rejected':
         return const Color(0xFFEF5350);
       case 'submitted':
-      case 'supervisor_review':
-      case 'supervisor_approved':
-      case 'k3_review':
+      case 'k3_filled':
+      case 'k3_umum_approved':
+      case 'mill_assistant_approved':
         return const Color(0xFFFFB74D);
       case 'draft':
         return const Color(0xFF78909C);

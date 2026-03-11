@@ -171,9 +171,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
       case 'rejected':
         return const Color(0xFFEF5350);
       case 'submitted':
-      case 'supervisor_review':
-      case 'supervisor_approved':
-      case 'k3_review':
+      case 'k3_filled':
+      case 'k3_umum_approved':
+      case 'mill_assistant_approved':
         return const Color(0xFFFFB74D);
       case 'draft':
         return const Color(0xFF78909C);
@@ -233,9 +233,9 @@ class _StatusBadge extends StatelessWidget {
       case 'rejected':
         return const Color(0xFFEF5350);
       case 'submitted':
-      case 'supervisor_review':
-      case 'supervisor_approved':
-      case 'k3_review':
+      case 'k3_filled':
+      case 'k3_umum_approved':
+      case 'mill_assistant_approved':
         return const Color(0xFFFFB74D);
       case 'draft':
         return const Color(0xFF78909C);

@@ -205,7 +205,7 @@ class _PermitListScreenState extends State<PermitListScreen> {
               Wrap(
                 spacing: 8,
                 runSpacing: 8,
-                children: ['draft', 'submitted', 'approved', 'rejected', 'active'].map((s) {
+                children: ['draft', 'submitted', 'k3_filled', 'k3_umum_approved', 'mill_assistant_approved', 'approved', 'rejected', 'active'].map((s) {
                   return ChoiceChip(
                     label: Text(s),
                     selected: _filterStatus == s,
@@ -275,9 +275,9 @@ class _StatusBadge extends StatelessWidget {
       case 'rejected':
         return const Color(0xFFEF5350);
       case 'submitted':
-      case 'supervisor_review':
-      case 'supervisor_approved':
-      case 'k3_review':
+      case 'k3_filled':
+      case 'k3_umum_approved':
+      case 'mill_assistant_approved':
         return const Color(0xFFFFB74D);
       case 'draft':
         return const Color(0xFF78909C);

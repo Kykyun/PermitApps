@@ -182,9 +182,13 @@ router.put('/:id', authenticate, async (req, res) => {
 // POST /api/permits/:id/submit — submit for review
 router.post('/:id/submit', authenticate, async (req, res) => {
     try {
+        if (req.user.role !== 'supervisor' && req.user.role !== 'admin') {
+            return res.status(403).json({ error: 'Only supervisor can submit permits' });
+        }
+
         const { rows: existing } = await pool.query('SELECT * FROM permits WHERE id = $1', [req.params.id]);
         if (existing.length === 0) return res.status(404).json({ error: 'Not found' });
-        if (existing[0].applicant_id !== req.user.id) return res.status(403).json({ error: 'Not your permit' });
+        if (existing[0].applicant_id !== req.user.id && req.user.role !== 'admin') return res.status(403).json({ error: 'Not your permit' });
         if (existing[0].status !== 'draft' && existing[0].status !== 'rejected') {
             return res.status(400).json({ error: 'Can only submit draft or rejected permits' });
         }
@@ -200,9 +204,9 @@ router.post('/:id/submit', authenticate, async (req, res) => {
             [req.params.id, req.user.id, req.user.role]
         );
 
-        // Notify supervisors
-        await notifyByRole('supervisor', req.params.id, 'New Permit Submission',
-            `${req.user.name} submitted permit ${existing[0].permit_number} for review`);
+        // Notify K3 officers
+        await notifyByRole('k3_officer', req.params.id, 'New Permit Submission',
+            `Supervisor ${req.user.name} submitted permit ${existing[0].permit_number} for review`);
 
         res.json({ permit: rows[0] });
     } catch (err) {
@@ -212,7 +216,7 @@ router.post('/:id/submit', authenticate, async (req, res) => {
 });
 
 // POST /api/permits/:id/approve — approve permit
-router.post('/:id/approve', authenticate, requireRole('supervisor', 'k3_officer', 'admin'), async (req, res) => {
+router.post('/:id/approve', authenticate, requireRole('k3_officer', 'k3_umum', 'mill_assistant', 'mill_manager', 'admin'), async (req, res) => {
     try {
         const { comments } = req.body;
         const { rows: existing } = await pool.query('SELECT * FROM permits WHERE id = $1', [req.params.id]);
@@ -221,22 +225,34 @@ router.post('/:id/approve', authenticate, requireRole('supervisor', 'k3_officer'
         const permit = existing[0];
         let newStatus;
 
-        if (req.user.role === 'supervisor' && (permit.status === 'submitted' || permit.status === 'supervisor_review')) {
-            newStatus = 'supervisor_approved';
-            // Notify K3 officers
-            await notifyByRole('k3_officer', permit.id, 'Permit Awaiting K3 Review',
-                `Supervisor approved permit ${permit.permit_number}. Needs K3 review.`);
-        } else if (req.user.role === 'k3_officer' && (permit.status === 'supervisor_approved' || permit.status === 'k3_review')) {
+        if (req.user.role === 'k3_officer' && permit.status === 'submitted') {
+            newStatus = 'k3_filled';
+            // Ahli K3 has filled the form, notify Ahli K3 Umum
+            await notifyByRole('k3_umum', permit.id, 'Permit Needs Review',
+                `Ahli K3 completed form for permit ${permit.permit_number}. Needs your review.`);
+        } else if (req.user.role === 'k3_umum' && permit.status === 'k3_filled') {
+            newStatus = 'k3_umum_approved';
+            // Notify Mill Assistant
+            await notifyByRole('mill_assistant', permit.id, 'Permit Needs Review',
+                `Ahli K3 Umum approved permit ${permit.permit_number}. Needs your review.`);
+        } else if (req.user.role === 'mill_assistant' && permit.status === 'k3_umum_approved') {
+            newStatus = 'mill_assistant_approved';
+            // Notify Mill Manager
+            await notifyByRole('mill_manager', permit.id, 'Permit Needs Final Approval',
+                `Mill Assistant approved permit ${permit.permit_number}. Ready for final approval.`);
+        } else if (req.user.role === 'mill_manager' && permit.status === 'mill_assistant_approved') {
             newStatus = 'approved';
-            // Notify applicant
-            await createNotification(permit.applicant_id, permit.id, 'Permit Approved ✅',
-                `Your permit ${permit.permit_number} has been approved!`);
+            // Notify Applicant
+            await createNotification(permit.applicant_id, permit.id, 'Permit Fully Approved ✅',
+                `Your permit ${permit.permit_number} has been entirely approved!`);
         } else if (req.user.role === 'admin') {
+            // Admin can advance any status directly to next step or straight to approved. Let's just say admin approves it linearly or fully.
+            // For simplicity, admin force-approves
             newStatus = 'approved';
-            await createNotification(permit.applicant_id, permit.id, 'Permit Approved ✅',
-                `Your permit ${permit.permit_number} has been approved by admin!`);
+            await createNotification(permit.applicant_id, permit.id, 'Permit Force Approved ✅',
+                `Your permit ${permit.permit_number} has been forcefully approved by admin!`);
         } else {
-            return res.status(400).json({ error: 'Cannot approve permit in current status' });
+            return res.status(400).json({ error: 'Cannot approve permit in current status with your role' });
         }
 
         const { rows } = await pool.query(
@@ -257,7 +273,7 @@ router.post('/:id/approve', authenticate, requireRole('supervisor', 'k3_officer'
 });
 
 // POST /api/permits/:id/reject — reject permit
-router.post('/:id/reject', authenticate, requireRole('supervisor', 'k3_officer', 'admin'), async (req, res) => {
+router.post('/:id/reject', authenticate, requireRole('k3_officer', 'k3_umum', 'mill_assistant', 'mill_manager', 'admin'), async (req, res) => {
     try {
         const { comments } = req.body;
         if (!comments) return res.status(400).json({ error: 'Rejection reason is required' });

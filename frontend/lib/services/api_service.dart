@@ -99,4 +99,10 @@ class ApiService {
   Future<Response> getDashboardTrend() => _dio.get('/dashboard/trend');
 
   Future<Response> getDashboardRecent() => _dio.get('/dashboard/recent');
+
+  // Users Management
+  Future<Response> getUsers() => _dio.get('/users');
+
+  Future<Response> updateUserRole(int id, String role) =>
+      _dio.put('/users/$id/role', data: {'role': role});
 }

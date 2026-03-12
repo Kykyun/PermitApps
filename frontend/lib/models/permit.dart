@@ -59,15 +59,15 @@ class Permit {
   String get typeLabel {
     switch (permitType) {
       case 'confined_space':
-        return 'Confined Space';
+        return 'Ruang Terbatas';
       case 'working_at_height':
-        return 'Working at Height';
+        return 'Di Ketinggian';
       case 'excavation':
         return 'Excavation';
       case 'electrical':
         return 'Electrical Work';
       case 'hot_work':
-        return 'Hot Work';
+        return 'Kerja Panas';
       default:
         return permitType;
     }

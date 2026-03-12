@@ -7,6 +7,7 @@ import '../models/permit.dart';
 import '../providers/auth_provider.dart';
 import '../providers/permit_provider.dart';
 import '../services/api_service.dart';
+import '../services/pdf_service.dart';
 
 class PermitDetailScreen extends StatefulWidget {
   final int permitId;
@@ -475,8 +476,22 @@ class _PermitDetailScreenState extends State<PermitDetailScreen> {
             _buildInfoMessage(Icons.pending_actions, 'Awaiting Mill Assistant', 'Review and approve to proceed to final step.'),
           if (p.status == 'mill_assistant_approved' && user.role == 'mill_manager')
             _buildInfoMessage(Icons.pending_actions, 'Awaiting Final Approval', 'Provide the final approval for this permit.'),
-          if (p.status == 'approved')
+          if (p.status == 'approved') ...[
             _buildInfoMessage(Icons.print, 'Permit Approved', 'This permit is fully approved. You can now execute the work safely.'),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: () => PdfService.printPermitPdf(p),
+                icon: const Icon(Icons.print),
+                label: const Text('Print Permit (PDF)'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF66BB6A),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                ),
+              ),
+            ),
+          ],
 
           // Upload Document Button for Ahli K3
           if (p.status == 'submitted' && user.role == 'k3_officer') ...[

@@ -192,7 +192,7 @@ class _HomeScreenState extends State<HomeScreen> {
           NavigationDestination(icon: Icon(Icons.description_outlined), selectedIcon: Icon(Icons.description), label: 'Permits'),
         ],
       ),
-      floatingActionButton: user.role == 'worker' || user.role == 'admin'
+      floatingActionButton: user.role == 'supervisor' || user.role == 'admin'
           ? FloatingActionButton.extended(
               onPressed: () {
                 Navigator.push(context,

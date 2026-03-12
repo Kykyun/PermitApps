@@ -47,7 +47,7 @@ router.get('/', authenticate, async (req, res) => {
         let paramIdx = 1;
 
         // Role-based filtering
-        if (req.user.role === 'worker') {
+        if (req.user.role === 'supervisor') {
             query += ` AND p.applicant_id = $${paramIdx++}`;
             params.push(req.user.id);
         }
@@ -130,6 +130,9 @@ router.get('/:id', authenticate, async (req, res) => {
 // POST /api/permits — create new permit
 router.post('/', authenticate, async (req, res) => {
     try {
+        if (req.user.role !== 'supervisor' && req.user.role !== 'admin') {
+            return res.status(403).json({ error: 'Only supervisor can create permits' });
+        }
         const { permit_type, work_description, work_location, start_date, end_date, hazard_identification, control_measures, ppe_required } = req.body;
 
         if (!permit_type || !work_description || !work_location || !start_date || !end_date) {

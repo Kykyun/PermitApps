@@ -225,11 +225,11 @@ class _PermitListScreenState extends State<PermitListScreen> {
                 spacing: 8,
                 runSpacing: 8,
                 children: [
-                  ('confined_space', '🕳️ Confined Space'),
-                  ('working_at_height', '🪜 Height'),
+                  ('confined_space', '🕳️ Ruang Terbatas'),
+                  ('working_at_height', '🪜 Di Ketinggian'),
                   ('excavation', '⛏️ Excavation'),
                   ('electrical', '⚡ Electrical'),
-                  ('hot_work', '🔥 Hot Work'),
+                  ('hot_work', '🔥 Kerja Panas'),
                 ].map((t) {
                   return ChoiceChip(
                     label: Text(t.$2),

@@ -217,8 +217,9 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
             ),
           ),
           const SizedBox(height: 16),
-          Text(
-            'Demo: worker@demo.com / worker123',
+          const Text(
+            'Demo Supervisor: spv@demo.com / spv123\nAdmin: admin@demo.com / admin123',
+            textAlign: TextAlign.center,
             style: TextStyle(color: Colors.white38, fontSize: 12),
           ),
         ],

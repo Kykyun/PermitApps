@@ -205,7 +205,7 @@ class _PermitListScreenState extends State<PermitListScreen> {
               Wrap(
                 spacing: 8,
                 runSpacing: 8,
-                children: ['draft', 'submitted', 'k3_filled', 'k3_umum_approved', 'mill_assistant_approved', 'approved', 'rejected', 'active'].map((s) {
+                children: ['draft', 'submitted', 'k3_filled', 'k3_umum_approved', 'approved', 'rejected', 'active'].map((s) {
                   return ChoiceChip(
                     label: Text(s),
                     selected: _filterStatus == s,
@@ -225,11 +225,11 @@ class _PermitListScreenState extends State<PermitListScreen> {
                 spacing: 8,
                 runSpacing: 8,
                 children: [
-                  ('confined_space', '🕳️ Ruang Terbatas'),
-                  ('working_at_height', '🪜 Di Ketinggian'),
+                  ('confined_space', '🕳️ Confined Space'),
+                  ('working_at_height', '🪜 Height'),
                   ('excavation', '⛏️ Excavation'),
                   ('electrical', '⚡ Electrical'),
-                  ('hot_work', '🔥 Kerja Panas'),
+                  ('hot_work', '🔥 Hot Work'),
                 ].map((t) {
                   return ChoiceChip(
                     label: Text(t.$2),

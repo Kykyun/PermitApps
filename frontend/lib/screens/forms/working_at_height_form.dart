@@ -214,17 +214,17 @@ class _WorkingAtHeightFormState extends State<WorkingAtHeightForm> {
     );
   }
 
-  Widget _buildTextField(String label, TextEditingController ctrl, {bool isRequired = true, int maxLines = 1}) {
+  Widget _buildTextField(String label, TextEditingController ctrl, {bool isRequired = true, int maxLines = 1, double fontSize = 12}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: TextFormField(
         controller: ctrl,
         maxLines: maxLines,
-        style: const TextStyle(fontSize: 12),
+        style: TextStyle(fontSize: fontSize),
         decoration: InputDecoration(
           isDense: true,
           labelText: isRequired ? '$label *' : label,
-          labelStyle: TextStyle(fontSize: 12, color: isRequired ? Colors.red.shade300 : Colors.white70),
+          labelStyle: TextStyle(fontSize: fontSize, color: isRequired ? Colors.red.shade300 : Colors.white70),
           focusedBorder: const UnderlineInputBorder(borderSide: BorderSide(color: Colors.green)),
           enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: isRequired ? Colors.red.withOpacity(0.5) : const Color(0xFF2A4056))),
         ),

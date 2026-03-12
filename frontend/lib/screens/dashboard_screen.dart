@@ -58,7 +58,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         children: [
           // Greeting
           Text(
-            'Welcome, ${user.name.split(' ').first}! 👋',
+            'Welcome, Safety First! 👋',
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 4),

@@ -59,15 +59,15 @@ class Permit {
   String get typeLabel {
     switch (permitType) {
       case 'confined_space':
-        return 'Ruang Terbatas';
+        return 'Confined Space';
       case 'working_at_height':
-        return 'Di Ketinggian';
+        return 'Working at Height';
       case 'excavation':
         return 'Excavation';
       case 'electrical':
         return 'Electrical Work';
       case 'hot_work':
-        return 'Kerja Panas';
+        return 'Hot Work';
       default:
         return permitType;
     }
@@ -95,17 +95,15 @@ class Permit {
       case 'draft':
         return 'Draft';
       case 'submitted':
-        return 'Submitted';
+        return 'Submitted (Awaiting K3)';
       case 'k3_filled':
         return 'K3 Filled (Review By K3 Umum)';
       case 'k3_umum_approved':
-        return 'K3 Umum Approved (Review By Mill Assistant)';
-      case 'mill_assistant_approved':
-        return 'Mill Assistant Approved (Pending Final Approval)';
+        return 'K3 Umum Approved (Awaiting Manager)';
       case 'approved':
-        return 'Approved';
+        return 'Approved ✅';
       case 'rejected':
-        return 'Rejected';
+        return 'Rejected ❌';
       case 'active':
         return 'Active';
       case 'expired':

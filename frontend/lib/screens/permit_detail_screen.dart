@@ -403,13 +403,6 @@ class _PermitDetailScreenState extends State<PermitDetailScreen> {
                                 clipBehavior: Clip.hardEdge,
                                 child: Column(
                                   children: [
-                                    Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: SelectableText(
-                                        'DEBUG URL: ${ApiService.baseUrl.replaceAll('/api', '')}${d.filePath}',
-                                        style: const TextStyle(fontSize: 10, color: Colors.orange),
-                                      ),
-                                    ),
                                     Expanded(
                                       child: Image.network(
                                         '${ApiService.baseUrl.replaceAll('/api', '')}${d.filePath}',
@@ -417,9 +410,13 @@ class _PermitDetailScreenState extends State<PermitDetailScreen> {
                                         errorBuilder: (context, error, stackTrace) => Center(
                                           child: Padding(
                                             padding: const EdgeInsets.all(8.0),
-                                            child: Text('Error: $error\n$stackTrace', 
-                                              style: const TextStyle(color: Colors.redAccent, fontSize: 10),
-                                              textAlign: TextAlign.center,
+                                            child: Column(
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              children: [
+                                                const Icon(Icons.broken_image, color: Colors.white38, size: 32),
+                                                const SizedBox(height: 4),
+                                                Text('Failed to load image', style: const TextStyle(color: Colors.white38, fontSize: 11)),
+                                              ],
                                             ),
                                           ),
                                         ),
@@ -469,15 +466,13 @@ class _PermitDetailScreenState extends State<PermitDetailScreen> {
 
           // Action buttons and Process info
           if (p.status == 'submitted' && user.role == 'k3_officer')
-            _buildInfoMessage(Icons.pending_actions, 'Awaiting Ahli K3', 'Please review, fill the necessary forms, and approve to proceed.'),
+            _buildInfoMessage(Icons.pending_actions, 'Awaiting K3 Officer', 'Please review, fill the form and upload field test documentation.'),
           if (p.status == 'k3_filled' && user.role == 'k3_umum')
             _buildInfoMessage(Icons.pending_actions, 'Awaiting K3 Umum Approval', 'Review test results and approve/reject with justification.'),
-          if (p.status == 'k3_umum_approved' && user.role == 'mill_assistant')
-            _buildInfoMessage(Icons.pending_actions, 'Awaiting Mill Assistant', 'Review and approve to proceed to final step.'),
-          if (p.status == 'mill_assistant_approved' && user.role == 'mill_manager')
+          if (p.status == 'k3_umum_approved' && user.role == 'mill_manager')
             _buildInfoMessage(Icons.pending_actions, 'Awaiting Final Approval', 'Provide the final approval for this permit.'),
           if (p.status == 'approved') ...[
-            _buildInfoMessage(Icons.print, 'Permit Approved', 'This permit is fully approved. You can now execute the work safely.'),
+            _buildInfoMessage(Icons.check_circle, 'Permit Approved ✅', 'This permit is fully approved. Work can be executed safely.'),
             const SizedBox(height: 16),
             SizedBox(
               width: double.infinity,
@@ -561,10 +556,12 @@ class _PermitDetailScreenState extends State<PermitDetailScreen> {
   }
 
   bool _canApprove(String role, String status) {
+    // K3 officer: only fills form, uses the approve endpoint to mark as k3_filled
     if (role == 'k3_officer' && status == 'submitted') return true;
+    // K3 Umum: Approval 1
     if (role == 'k3_umum' && status == 'k3_filled') return true;
-    if (role == 'mill_assistant' && status == 'k3_umum_approved') return true;
-    if (role == 'mill_manager' && status == 'mill_assistant_approved') return true;
+    // Mill Manager: Approval 2 (Final) — directly after K3 Umum
+    if (role == 'mill_manager' && status == 'k3_umum_approved') return true;
     if (role == 'admin') return status != 'approved' && status != 'rejected' && status != 'draft';
     return false;
   }

@@ -5,7 +5,8 @@ import '../models/permit.dart';
 import 'permit_detail_screen.dart';
 
 class PermitListScreen extends StatefulWidget {
-  const PermitListScreen({super.key});
+  final String? initialStatusFilter;
+  const PermitListScreen({super.key, this.initialStatusFilter});
 
   @override
   State<PermitListScreen> createState() => _PermitListScreenState();
@@ -19,8 +20,9 @@ class _PermitListScreenState extends State<PermitListScreen> {
   @override
   void initState() {
     super.initState();
+    _filterStatus = widget.initialStatusFilter;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<PermitProvider>().loadPermits();
+      context.read<PermitProvider>().loadPermits(status: _filterStatus);
     });
   }
 

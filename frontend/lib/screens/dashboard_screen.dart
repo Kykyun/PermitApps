@@ -6,7 +6,8 @@ import '../models/permit.dart';
 import 'permit_detail_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
-  const DashboardScreen({super.key});
+  final void Function(String? statusFilter)? onStatTap;
+  const DashboardScreen({super.key, this.onStatTap});
 
   @override
   State<DashboardScreen> createState() => _DashboardScreenState();
@@ -114,10 +115,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           children: [
-            _StatCard(title: 'Active', value: stats['active']?.toString() ?? '0', icon: Icons.check_circle_outline, color: const Color(0xFF66BB6A)),
-            _StatCard(title: 'Pending', value: stats['pending']?.toString() ?? '0', icon: Icons.hourglass_empty, color: const Color(0xFFFFB74D)),
-            _StatCard(title: 'Rejected', value: stats['rejected']?.toString() ?? '0', icon: Icons.cancel_outlined, color: const Color(0xFFEF5350)),
-            _StatCard(title: 'Total', value: stats['total']?.toString() ?? '0', icon: Icons.folder_outlined, color: const Color(0xFF4FC3F7)),
+            _StatCard(title: 'Active', value: stats['active']?.toString() ?? '0', icon: Icons.check_circle_outline, color: const Color(0xFF66BB6A), onTap: () => widget.onStatTap?.call('approved')),
+            _StatCard(title: 'Pending', value: stats['pending']?.toString() ?? '0', icon: Icons.hourglass_empty, color: const Color(0xFFFFB74D), onTap: () => widget.onStatTap?.call('submitted')),
+            _StatCard(title: 'Rejected', value: stats['rejected']?.toString() ?? '0', icon: Icons.cancel_outlined, color: const Color(0xFFEF5350), onTap: () => widget.onStatTap?.call('rejected')),
+            _StatCard(title: 'Total', value: stats['total']?.toString() ?? '0', icon: Icons.folder_outlined, color: const Color(0xFF4FC3F7), onTap: () => widget.onStatTap?.call(null)),
           ],
         );
       },
@@ -188,32 +189,36 @@ class _StatCard extends StatelessWidget {
   final String value;
   final IconData icon;
   final Color color;
+  final VoidCallback? onTap;
 
-  const _StatCard({required this.title, required this.value, required this.icon, required this.color});
+  const _StatCard({required this.title, required this.value, required this.icon, required this.color, this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: const Color(0xFF162A3E),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: color.withValues(alpha: 0.2)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Row(
-            children: [
-              Icon(icon, color: color, size: 20),
-              const Spacer(),
-              Text(value, style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: color)),
-            ],
-          ),
-          const SizedBox(height: 4),
-          Text(title, style: const TextStyle(color: Colors.white54, fontSize: 12)),
-        ],
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: const Color(0xFF162A3E),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: color.withValues(alpha: 0.2)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Row(
+              children: [
+                Icon(icon, color: color, size: 20),
+                const Spacer(),
+                Text(value, style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: color)),
+              ],
+            ),
+            const SizedBox(height: 4),
+            Text(title, style: const TextStyle(color: Colors.white54, fontSize: 12)),
+          ],
+        ),
       ),
     );
   }

@@ -17,10 +17,19 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
+  String? _permitStatusFilter;
 
-  final _pages = const [
-    DashboardScreen(),
-    PermitListScreen(),
+  List<Widget> get _pages => [
+    DashboardScreen(onStatTap: (filter) {
+      setState(() {
+        _permitStatusFilter = filter;
+        _currentIndex = 1;
+      });
+    }),
+    PermitListScreen(
+      key: ValueKey('permits_$_permitStatusFilter'),
+      initialStatusFilter: _permitStatusFilter,
+    ),
   ];
 
   @override
@@ -184,7 +193,10 @@ class _HomeScreenState extends State<HomeScreen> {
       body: _pages[_currentIndex],
       bottomNavigationBar: NavigationBar(
         selectedIndex: _currentIndex,
-        onDestinationSelected: (i) => setState(() => _currentIndex = i),
+        onDestinationSelected: (i) => setState(() {
+          if (i == 1 && _currentIndex != 1) _permitStatusFilter = null;
+          _currentIndex = i;
+        }),
         backgroundColor: const Color(0xFF162A3E),
         indicatorColor: const Color(0xFF4FC3F7).withValues(alpha: 0.2),
         destinations: const [

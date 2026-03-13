@@ -159,11 +159,7 @@ class _HotWorkFormState extends State<HotWorkForm> {
   }
 
   Future<void> _submitForm() async {
-    if (!_formKey.currentState!.validate()) return;
-    if (_spvSig == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Tanda Tangan Dibuat Oleh (Supervisor) sangat diperlukan.'), backgroundColor: Colors.red));
-      return;
-    }
+    // No mandatory validation - all fields are optional
 
     setState(() => _isLoading = true);
 
@@ -245,7 +241,7 @@ class _HotWorkFormState extends State<HotWorkForm> {
     );
   }
 
-  Widget _buildTextField(String label, TextEditingController ctrl, {bool isRequired = true, int maxLines = 1, double fontSize = 13}) {
+  Widget _buildTextField(String label, TextEditingController ctrl, {bool isRequired = false, int maxLines = 1, double fontSize = 13}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: TextFormField(

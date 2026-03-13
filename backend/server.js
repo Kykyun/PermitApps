@@ -35,11 +35,23 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
+// Serve Flutter Web App (static files)
+const webPath = path.join(__dirname, 'web');
+app.use(express.static(webPath));
+
+// SPA fallback — any non-API route serves index.html
+app.get('*', (req, res) => {
+  if (!req.path.startsWith('/api') && !req.path.startsWith('/uploads')) {
+    res.sendFile(path.join(webPath, 'index.html'));
+  }
+});
+
 // Initialize database and start server
 initDatabase()
   .then(() => {
     app.listen(PORT, '0.0.0.0', () => {
       console.log(`✅ Work Permit API running on port ${PORT}`);
+      console.log(`🌐 Web App: http://localhost:${PORT}`);
     });
   })
   .catch(err => {

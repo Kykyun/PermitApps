@@ -129,15 +129,7 @@ class _ConfinedSpaceFormState extends State<ConfinedSpaceForm> {
   }
 
   Future<void> _submitForm() async {
-    if (!_formKey.currentState!.validate()) return;
-    
-    // Validate minimal mandatory signatures depending on the workflow logic
-    // We will validate only basic ones to allow creation. 
-    // In production, Supervisor / Applicant must sign.
-    if (_supervisorSig == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Tanda Tangan Entry Supervisor sangat diperlukan.'), backgroundColor: Colors.red));
-      return;
-    }
+    // No mandatory validation - all fields are optional
 
     setState(() => _isLoading = true);
 
@@ -223,7 +215,7 @@ class _ConfinedSpaceFormState extends State<ConfinedSpaceForm> {
     );
   }
 
-  Widget _buildTextField(String label, TextEditingController ctrl, {bool isRequired = true, int maxLines = 1}) {
+  Widget _buildTextField(String label, TextEditingController ctrl, {bool isRequired = false, int maxLines = 1}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: TextFormField(

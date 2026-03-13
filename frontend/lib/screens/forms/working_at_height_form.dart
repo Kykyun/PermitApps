@@ -140,11 +140,7 @@ class _WorkingAtHeightFormState extends State<WorkingAtHeightForm> {
   }
 
   Future<void> _submitForm() async {
-    if (!_formKey.currentState!.validate()) return;
-    if (_pelaksanaSig == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Tanda tangan Pelaksana Pekerjaan sangat diperlukan.'), backgroundColor: Colors.red));
-      return;
-    }
+    // No mandatory validation - all fields are optional
 
     setState(() => _isLoading = true);
 
@@ -214,7 +210,7 @@ class _WorkingAtHeightFormState extends State<WorkingAtHeightForm> {
     );
   }
 
-  Widget _buildTextField(String label, TextEditingController ctrl, {bool isRequired = true, int maxLines = 1, double fontSize = 12}) {
+  Widget _buildTextField(String label, TextEditingController ctrl, {bool isRequired = false, int maxLines = 1, double fontSize = 12}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: TextFormField(

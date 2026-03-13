@@ -83,11 +83,19 @@ class PdfService {
       margin: const pw.EdgeInsets.only(top: 8),
       padding: const pw.EdgeInsets.symmetric(vertical: 4),
       decoration: const pw.BoxDecoration(border: pw.Border(top: pw.BorderSide(color: PdfColors.grey300))),
-      child: pw.Row(
-        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+      child: pw.Column(
+        mainAxisSize: pw.MainAxisSize.min,
+        crossAxisAlignment: pw.CrossAxisAlignment.start,
         children: [
-          pw.Text('Generated: ${_dateFormat.format(DateTime.now())}', style: const pw.TextStyle(color: PdfColors.grey, fontSize: 8)),
-          pw.Text('Page ${context.pageNumber} of ${context.pagesCount}', style: const pw.TextStyle(color: PdfColors.grey, fontSize: 8)),
+          pw.Text('This form no need signature.', style: pw.TextStyle(color: PdfColors.grey700, fontSize: 8, fontStyle: pw.FontStyle.italic)),
+          pw.SizedBox(height: 4),
+          pw.Row(
+            mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+            children: [
+              pw.Text('Generated: ${_dateFormat.format(DateTime.now())}', style: const pw.TextStyle(color: PdfColors.grey, fontSize: 8)),
+              pw.Text('Page ${context.pageNumber} of ${context.pagesCount}', style: const pw.TextStyle(color: PdfColors.grey, fontSize: 8)),
+            ],
+          ),
         ],
       ),
     );
@@ -444,24 +452,25 @@ class PdfService {
 
     widgets.add(_buildBasicInfoTable(permit));
 
-    // Extra info
-    if (data['permit_ref'] != null || data['equipment'] != null || data['contractor'] != null) {
+    // Extra info (ref_no from form = Permit Reference)
+    final permitRef = data['permit_ref'] ?? data['ref_no'];
+    if (permitRef != null || data['equipment'] != null || data['contractor'] != null) {
       widgets.add(_sectionHeader('Additional Details'));
       widgets.add(pw.Table(
         border: pw.TableBorder.all(color: PdfColors.grey300),
         columnWidths: { 0: const pw.FlexColumnWidth(1.2), 1: const pw.FlexColumnWidth(2.8) },
         children: [
-          if (data['permit_ref']?.toString().isNotEmpty == true) _tableRow('Permit Reference', data['permit_ref']),
+          if (permitRef?.toString().isNotEmpty == true) _tableRow('Permit Reference', permitRef),
           if (data['equipment']?.toString().isNotEmpty == true) _tableRow('Equipment Used', data['equipment']),
           if (data['contractor']?.toString().isNotEmpty == true) _tableRow('Contractor', data['contractor']),
         ],
       ));
     }
 
-    // Safety Matrix (YES/NO/NA questions)
+    // C. Safety Matrix (YES/NO/NA) - form sends 'q'/'s'/'r'
     if (data['safety_matrix'] is List) {
       final matrix = data['safety_matrix'] as List;
-      widgets.add(_sectionHeader('Safety Requirements Assessment'));
+      widgets.add(_sectionHeader('C. Safety Requirements Assessment'));
       widgets.add(pw.Table(
         border: pw.TableBorder.all(color: PdfColors.grey300),
         columnWidths: {
@@ -483,14 +492,16 @@ class PdfService {
           ...matrix.asMap().entries.map((e) {
             final idx = e.key + 1;
             final item = e.value as Map<String, dynamic>;
-            final status = item['status']?.toString() ?? 'N/A';
+            final question = item['question']?.toString() ?? item['q']?.toString() ?? '';
+            final status = item['status']?.toString() ?? item['s']?.toString() ?? 'N/A';
+            final remarks = item['remarks']?.toString() ?? item['r']?.toString() ?? '';
             final statusColor = status == 'YES' ? PdfColors.green800 : (status == 'NO' ? PdfColors.red : PdfColors.grey);
             return pw.TableRow(
               children: [
                 _cell('$idx'),
-                _cell(item['question']?.toString() ?? '', fontSize: 7),
+                _cell(question, fontSize: 7),
                 _cell(status, align: pw.TextAlign.center, bold: true, color: statusColor),
-                _cell(item['remarks']?.toString() ?? ''),
+                _cell(remarks),
               ],
             );
           }),
@@ -498,28 +509,72 @@ class PdfService {
       ));
     }
 
-    // Approvals
+    // E. Persetujuan Sebelum Mulai Bekerja (approvals_data)
+    if (data['approvals_data'] is Map) {
+      final ad = data['approvals_data'] as Map<String, dynamic>;
+      widgets.add(_sectionHeader('E. Persetujuan Sebelum Mulai Bekerja'));
+      widgets.add(_buildKeyValueTableFromMap(ad));
+    }
+
+    // Approvals (legacy)
     if (data['approvals'] is Map) {
       widgets.add(_buildApprovalsTable(Map<String, dynamic>.from(data['approvals'])));
     }
 
-    // Work Completion
-    if (data['work_completion'] is Map) {
-      final wc = data['work_completion'] as Map<String, dynamic>;
-      widgets.add(_sectionHeader('Work Completion'));
-      widgets.add(pw.Table(
-        border: pw.TableBorder.all(color: PdfColors.grey300),
-        columnWidths: { 0: const pw.FlexColumnWidth(1.2), 1: const pw.FlexColumnWidth(2.8) },
-        children: [
-          if (wc['pelaksana_name']?.toString().isNotEmpty == true) _tableRow('Worker Name', wc['pelaksana_name']),
-          if (wc['pelaksana_jabatan']?.toString().isNotEmpty == true) _tableRow('Worker Position', wc['pelaksana_jabatan']),
-          if (wc['issuer_name']?.toString().isNotEmpty == true) _tableRow('Issuer Name', wc['issuer_name']),
-          if (wc['issuer_jabatan']?.toString().isNotEmpty == true) _tableRow('Issuer Position', wc['issuer_jabatan']),
-        ],
-      ));
+    // F. Penyelesaian Pekerjaan (completion_data or work_completion)
+    final completion = data['completion_data'] is Map
+        ? data['completion_data'] as Map<String, dynamic>
+        : data['work_completion'] as Map<String, dynamic>?;
+    if (completion != null && completion.isNotEmpty) {
+      widgets.add(_sectionHeader('F. Penyelesaian Pekerjaan'));
+      final rows = <pw.TableRow>[];
+      if (completion['pelaksana'] is Map) {
+        final p = completion['pelaksana'] as Map<String, dynamic>;
+        if (p['name']?.toString().isNotEmpty == true) rows.add(_tableRow('Pelaksana (Nama)', p['name']));
+        if (p['pos']?.toString().isNotEmpty == true) rows.add(_tableRow('Pelaksana (Jabatan)', p['pos']));
+      }
+      if (completion['issuer'] is Map) {
+        final i = completion['issuer'] as Map<String, dynamic>;
+        if (i['name']?.toString().isNotEmpty == true) rows.add(_tableRow('Pemberi Izin (Nama)', i['name']));
+        if (i['pos']?.toString().isNotEmpty == true) rows.add(_tableRow('Pemberi Izin (Jabatan)', i['pos']));
+      }
+      if (rows.isEmpty) {
+        if (completion['pelaksana_name']?.toString().isNotEmpty == true) rows.add(_tableRow('Worker Name', completion['pelaksana_name']));
+        if (completion['pelaksana_jabatan']?.toString().isNotEmpty == true) rows.add(_tableRow('Worker Position', completion['pelaksana_jabatan']));
+        if (completion['issuer_name']?.toString().isNotEmpty == true) rows.add(_tableRow('Issuer Name', completion['issuer_name']));
+        if (completion['issuer_jabatan']?.toString().isNotEmpty == true) rows.add(_tableRow('Issuer Position', completion['issuer_jabatan']));
+      }
+      if (rows.isNotEmpty) {
+        widgets.add(pw.Table(
+          border: pw.TableBorder.all(color: PdfColors.grey300),
+          columnWidths: { 0: const pw.FlexColumnWidth(1.2), 1: const pw.FlexColumnWidth(2.8) },
+          children: rows,
+        ));
+      }
     }
 
     return widgets;
+  }
+
+  static pw.Widget _buildKeyValueTableFromMap(Map<String, dynamic> map) {
+    final rows = <pw.TableRow>[];
+    void addFrom(Map<String, dynamic> m, String prefix) {
+      final name = m['name']?.toString() ?? m['nama']?.toString();
+      final pos = m['pos']?.toString() ?? m['jabatan']?.toString() ?? m['position']?.toString();
+      if (name?.isNotEmpty == true) rows.add(_tableRow('$prefix (Nama)', name!));
+      if (pos?.isNotEmpty == true) rows.add(_tableRow('$prefix (Jabatan)', pos!));
+    }
+    for (final e in map.entries) {
+      if (e.value is Map) {
+        addFrom(Map<String, dynamic>.from(e.value as Map), _formatKey(e.key));
+      }
+    }
+    if (rows.isEmpty) return pw.SizedBox();
+    return pw.Table(
+      border: pw.TableBorder.all(color: PdfColors.grey300),
+      columnWidths: { 0: const pw.FlexColumnWidth(1.2), 1: const pw.FlexColumnWidth(2.8) },
+      children: rows,
+    );
   }
 
   // ======================== GENERIC FORM ========================
@@ -539,7 +594,7 @@ class PdfService {
     return widgets;
   }
 
-  static pw.Widget _buildKeyValueSection(Map<String, dynamic> data, {int depth = 0}) {
+  static pw.Widget _buildKeyValueSection(Map<String, dynamic> data) {
     return pw.Table(
       border: pw.TableBorder.all(color: PdfColors.grey300),
       columnWidths: { 0: const pw.FlexColumnWidth(1.5), 1: const pw.FlexColumnWidth(3) },

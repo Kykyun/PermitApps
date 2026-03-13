@@ -175,15 +175,33 @@ class _PermitDetailScreenState extends State<PermitDetailScreen> {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: data.entries.map((e) {
+          final valueWidget = _buildFormattedJson(e.value, depth: depth + 1);
+          final isSimple = e.value is! Map && e.value is! List;
           return Padding(
-            padding: EdgeInsets.only(bottom: 6.0, top: 4.0, left: depth > 0 ? 12.0 : 0),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('${_formatKey(e.key.toString())}: ', style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: Color(0xFF4FC3F7))),
-                Expanded(child: _buildFormattedJson(e.value, depth: depth + 1)),
-              ],
-            ),
+            padding: EdgeInsets.only(bottom: 8.0, top: 4.0, left: depth > 0 ? 12.0 : 0),
+            child: isSimple
+                ? Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(_formatKey(e.key.toString()), style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: Color(0xFF4FC3F7))),
+                      const SizedBox(height: 2),
+                      Padding(
+                        padding: const EdgeInsets.only(left: 0),
+                        child: DefaultTextStyle(
+                          style: const TextStyle(color: Colors.white70, fontSize: 13, height: 1.4),
+                          child: valueWidget,
+                        ),
+                      ),
+                    ],
+                  )
+                : Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('${_formatKey(e.key.toString())}: ', style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: Color(0xFF4FC3F7))),
+                      Expanded(child: valueWidget),
+                    ],
+                  ),
           );
         }).toList(),
       );
@@ -201,7 +219,7 @@ class _PermitDetailScreenState extends State<PermitDetailScreen> {
         return Text(data.join(', '), style: const TextStyle(color: Colors.white, fontSize: 13));
       }
     } else {
-      return Text(data.toString(), style: const TextStyle(color: Colors.white, fontSize: 13));
+      return Text(data.toString(), style: const TextStyle(color: Colors.white70, fontSize: 13));
     }
   }
 
@@ -313,7 +331,7 @@ class _PermitDetailScreenState extends State<PermitDetailScreen> {
                 children: [
                   const Text('Work Description', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
                   const SizedBox(height: 8),
-                  Text(p.workDescription, style: const TextStyle(color: Colors.white70, height: 1.5)),
+                  _buildJsonOrText(p.workDescription),
                   if (p.hazardIdentification?.isNotEmpty == true) ...[
                     const SizedBox(height: 16),
                     const Text('Detailed Information / Safety Checklist', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),

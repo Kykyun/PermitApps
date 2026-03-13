@@ -243,14 +243,8 @@ class _WorkingAtHeightFormState extends State<WorkingAtHeightForm> {
           children: [
             Padding(
               padding: const EdgeInsets.all(12),
-              child: Row(
-                children: [
-                  const Icon(Icons.eco, color: Colors.green, size: 32),
-                  const SizedBox(width: 8),
-                  const Text('KLK', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24, color: Colors.green)),
-                  const Expanded(child: Text('STABAT PALM OIL MILL\nIZIN BEKERJA DI KETINGGIAN', textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))),
-                  const Text('000018', style: TextStyle(color: Colors.red, fontSize: 20)),
-                ],
+              child: const Center(
+                child: Text('STABAT PALM OIL MILL\nIZIN BEKERJA DI KETINGGIAN', textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
               ),
             ),
 

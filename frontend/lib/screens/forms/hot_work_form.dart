@@ -283,14 +283,9 @@ class _HotWorkFormState extends State<HotWorkForm> {
         child: ListView(
           padding: const EdgeInsets.all(12),
           children: [
-            // Header Image/Logo text
-            Row(
-              children: [
-                const Icon(Icons.eco, color: Colors.green, size: 32),
-                const SizedBox(width: 8),
-                const Text('KLK', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24, color: Colors.green)),
-                const Expanded(child: Text('IZIN KERJA PANAS\n(HOT WORK PERMIT)', textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))),
-              ],
+            // Header title only
+            const Center(
+              child: Text('STABAT PALM OIL MILL\nIZIN KERJA PANAS (HOT WORK PERMIT)', textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
             ),
             const SizedBox(height: 8),
             Row(

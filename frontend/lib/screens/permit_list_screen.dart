@@ -187,76 +187,83 @@ class _PermitListScreenState extends State<PermitListScreen> {
   }
 
   void _showFilterSheet() {
+    final maxHeight = MediaQuery.of(context).size.height * 0.85;
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
       backgroundColor: const Color(0xFF162A3E),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) => StatefulBuilder(
-        builder: (context, setSheetState) => Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text('Filter Permits', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 16),
-              const Text('Status', style: TextStyle(color: Colors.white54, fontSize: 13)),
-              const SizedBox(height: 8),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: ['draft', 'submitted', 'k3_filled', 'k3_umum_approved', 'approved', 'rejected', 'active'].map((s) {
-                  return ChoiceChip(
-                    label: Text(s),
-                    selected: _filterStatus == s,
-                    selectedColor: const Color(0xFF4FC3F7),
-                    backgroundColor: const Color(0xFF1C2F42),
-                    onSelected: (sel) {
-                      setSheetState(() => _filterStatus = sel ? s : null);
-                      setState(() {});
-                    },
-                  );
-                }).toList(),
-              ),
-              const SizedBox(height: 16),
-              const Text('Type', style: TextStyle(color: Colors.white54, fontSize: 13)),
-              const SizedBox(height: 8),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
+        builder: (context, setSheetState) => ConstrainedBox(
+          constraints: BoxConstraints(maxHeight: maxHeight),
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(24, 24, 24, 24 + MediaQuery.of(context).padding.bottom),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  ('confined_space', '🕳️ Confined Space'),
-                  ('working_at_height', '🪜 Height'),
-                  ('excavation', '⛏️ Excavation'),
-                  ('electrical', '⚡ Electrical'),
-                  ('hot_work', '🔥 Hot Work'),
-                ].map((t) {
-                  return ChoiceChip(
-                    label: Text(t.$2),
-                    selected: _filterType == t.$1,
-                    selectedColor: const Color(0xFF4FC3F7),
-                    backgroundColor: const Color(0xFF1C2F42),
-                    onSelected: (sel) {
-                      setSheetState(() => _filterType = sel ? t.$1 : null);
-                      setState(() {});
-                    },
-                  );
-                }).toList(),
+                  const Text('Filter Permits', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 16),
+                  const Text('Status', style: TextStyle(color: Colors.white54, fontSize: 13)),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: ['draft', 'submitted', 'k3_filled', 'k3_umum_approved', 'approved', 'rejected', 'active'].map((s) {
+                      return ChoiceChip(
+                        label: Text(s),
+                        selected: _filterStatus == s,
+                        selectedColor: const Color(0xFF4FC3F7),
+                        backgroundColor: const Color(0xFF1C2F42),
+                        onSelected: (sel) {
+                          setSheetState(() => _filterStatus = sel ? s : null);
+                          setState(() {});
+                        },
+                      );
+                    }).toList(),
+                  ),
+                  const SizedBox(height: 16),
+                  const Text('Type', style: TextStyle(color: Colors.white54, fontSize: 13)),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      ('confined_space', '🕳️ Confined Space'),
+                      ('working_at_height', '🪜 Height'),
+                      ('excavation', '⛏️ Excavation'),
+                      ('electrical', '⚡ Electrical'),
+                      ('hot_work', '🔥 Hot Work'),
+                    ].map((t) {
+                      return ChoiceChip(
+                        label: Text(t.$2),
+                        selected: _filterType == t.$1,
+                        selectedColor: const Color(0xFF4FC3F7),
+                        backgroundColor: const Color(0xFF1C2F42),
+                        onSelected: (sel) {
+                          setSheetState(() => _filterType = sel ? t.$1 : null);
+                          setState(() {});
+                        },
+                      );
+                    }).toList(),
+                  ),
+                  const SizedBox(height: 24),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        _applyFilters();
+                      },
+                      child: const Text('Apply Filters'),
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                    _applyFilters();
-                  },
-                  child: const Text('Apply Filters'),
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ),

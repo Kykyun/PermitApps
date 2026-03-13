@@ -18,6 +18,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
   String? _permitStatusFilter;
+  bool _userMenuExpanded = false;
 
   List<Widget> get _pages => [
     DashboardScreen(onStatTap: (filter) {
@@ -38,6 +39,66 @@ class _HomeScreenState extends State<HomeScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<NotificationProvider>().loadNotifications();
     });
+  }
+
+  Widget _buildUserMenuPanel(BuildContext context, dynamic user, AuthProvider auth) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: const Color(0xFF162A3E),
+        border: Border(bottom: BorderSide(color: Colors.white12)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(user.name, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
+              const SizedBox(height: 2),
+              Text(user.email, style: const TextStyle(fontSize: 12, color: Colors.white54)),
+              const SizedBox(height: 2),
+              Text(user.roleLabel, style: const TextStyle(fontSize: 12, color: Color(0xFF4FC3F7))),
+            ],
+          ),
+          const Divider(height: 20, color: Colors.white12),
+          if (user.role == 'admin')
+            InkWell(
+              onTap: () {
+                setState(() => _userMenuExpanded = false);
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const UserManagementScreen()));
+              },
+              child: const Padding(
+                padding: EdgeInsets.symmetric(vertical: 8),
+                child: Row(
+                  children: [
+                    Icon(Icons.manage_accounts_outlined, size: 18, color: Colors.white),
+                    SizedBox(width: 8),
+                    Text('Manage Users'),
+                  ],
+                ),
+              ),
+            ),
+          InkWell(
+            onTap: () {
+              setState(() => _userMenuExpanded = false);
+              auth.logout();
+            },
+            child: const Padding(
+              padding: EdgeInsets.symmetric(vertical: 8),
+              child: Row(
+                children: [
+                  Icon(Icons.logout, size: 18, color: Color(0xFFEF5350)),
+                  SizedBox(width: 8),
+                  Text('Logout', style: TextStyle(color: Color(0xFFEF5350))),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -95,84 +156,24 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
             ],
           ),
-          // User menu
-          Builder(
-            builder: (buttonContext) => GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: () async {
-                final RenderBox button = buttonContext.findRenderObject() as RenderBox;
-                final RenderBox overlay = Navigator.of(context).overlay!.context.findRenderObject() as RenderBox;
-                final RelativeRect position = RelativeRect.fromRect(
-                  Rect.fromPoints(
-                    button.localToGlobal(Offset.zero, ancestor: overlay),
-                    button.localToGlobal(button.size.bottomRight(Offset.zero), ancestor: overlay),
+          // User menu - tap toggles expandable panel (no overlay, so content is not covered)
+          GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () => setState(() => _userMenuExpanded = !_userMenuExpanded),
+            child: Container(
+              color: Colors.transparent,
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Row(
+                children: [
+                  CircleAvatar(
+                    radius: 16,
+                    backgroundColor: const Color(0xFF4FC3F7),
+                    child: Text(
+                      user.name[0].toUpperCase(),
+                      style: const TextStyle(color: Color(0xFF0F1923), fontWeight: FontWeight.bold),
+                    ),
                   ),
-                  Offset.zero & overlay.size,
-                );
-
-                final v = await showMenu<String>(
-                  context: context,
-                  position: position,
-                  color: const Color(0xFF162A3E),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  items: [
-                    PopupMenuItem(
-                      enabled: false,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(user.name, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
-                          const SizedBox(height: 2),
-                          Text(user.email, style: const TextStyle(fontSize: 12, color: Colors.white54)),
-                          const SizedBox(height: 2),
-                          Text(user.roleLabel, style: const TextStyle(fontSize: 12, color: Color(0xFF4FC3F7))),
-                        ],
-                      ),
-                    ),
-                    const PopupMenuDivider(height: 1),
-                    if (user.role == 'admin')
-                      const PopupMenuItem(
-                        value: 'users',
-                        child: Row(
-                          children: [
-                            Icon(Icons.manage_accounts_outlined, size: 18, color: Colors.white),
-                            SizedBox(width: 8),
-                            Text('Manage Users'),
-                          ],
-                        ),
-                      ),
-                    const PopupMenuItem(
-                      value: 'logout',
-                      child: Row(
-                        children: [
-                          Icon(Icons.logout, size: 18, color: Color(0xFFEF5350)),
-                          SizedBox(width: 8),
-                          Text('Logout', style: TextStyle(color: Color(0xFFEF5350))),
-                        ],
-                      ),
-                    ),
-                  ],
-                );
-                if (v == 'logout') {
-                  auth.logout();
-                } else if (v == 'users') {
-                  Navigator.push(context, MaterialPageRoute(builder: (_) => const UserManagementScreen()));
-                }
-              },
-              child: Container(
-                color: Colors.transparent,
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Row(
-                  children: [
-                    CircleAvatar(
-                      radius: 16,
-                      backgroundColor: const Color(0xFF4FC3F7),
-                      child: Text(
-                        user.name[0].toUpperCase(),
-                        style: const TextStyle(color: Color(0xFF0F1923), fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                    if (isWide) ...[
+                  if (isWide) ...[
                     const SizedBox(width: 8),
                     Column(
                       mainAxisSize: MainAxisSize.min,
@@ -187,10 +188,22 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
           ),
+        ],
+      ),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (_userMenuExpanded) _buildUserMenuPanel(context, user, auth),
+          Expanded(
+            child: GestureDetector(
+              onTap: () {
+                if (_userMenuExpanded) setState(() => _userMenuExpanded = false);
+              },
+              child: _pages[_currentIndex],
+            ),
           ),
         ],
       ),
-      body: _pages[_currentIndex],
       bottomNavigationBar: NavigationBar(
         selectedIndex: _currentIndex,
         onDestinationSelected: (i) => setState(() {

@@ -194,33 +194,44 @@ class _StatCard extends StatelessWidget {
   const _StatCard({required this.title, required this.value, required this.icon, required this.color, this.onTap});
 
   @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: const Color(0xFF162A3E),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: color.withValues(alpha: 0.2)),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Row(
-              children: [
-                Icon(icon, color: color, size: 20),
-                const Spacer(),
-                Text(value, style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: color)),
+  Widget build(BuildContext context) {    final child = Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFF162A3E),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: color.withValues(alpha: 0.2)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Row(
+            children: [
+              Icon(icon, color: color, size: 20),
+              const Spacer(),
+              Text(value, style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: color)),
+              if (onTap != null) ...[
+                const SizedBox(width: 4),
+                Icon(Icons.arrow_forward_ios, size: 12, color: color.withValues(alpha: 0.7)),
               ],
-            ),
-            const SizedBox(height: 4),
-            Text(title, style: const TextStyle(color: Colors.white54, fontSize: 12)),
-          ],
-        ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Text(title, style: const TextStyle(color: Colors.white54, fontSize: 12)),
+        ],
       ),
     );
+    if (onTap != null) {
+      return Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(16),
+          child: child,
+        ),
+      );
+    }
+    return child;
   }
 }
 

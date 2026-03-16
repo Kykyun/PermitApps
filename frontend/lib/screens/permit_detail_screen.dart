@@ -230,6 +230,31 @@ class _PermitDetailScreenState extends State<PermitDetailScreen> {
     }).join(' ');
   }
 
+  String _prettyDescription(Permit p) {
+    if (p.permitType == 'hot_work') {
+      try {
+        if (p.hazardIdentification != null && p.hazardIdentification!.isNotEmpty) {
+          final decoded = jsonDecode(p.hazardIdentification!);
+          if (decoded is Map<String, dynamic>) {
+            final contractor = (decoded['contractor'] ?? '').toString().trim();
+            final applicant = (decoded['applicant'] ?? '').toString().trim();
+            final who = contractor.isNotEmpty
+                ? contractor
+                : (applicant.isNotEmpty ? applicant : (p.applicantName ?? ''));
+            final location = p.workLocation;
+            if (who.isNotEmpty) {
+              return 'Hot work at $location by $who';
+            }
+            return 'Hot work at $location';
+          }
+        }
+      } catch (_) {
+        // ignore and fall back
+      }
+    }
+    return p.workDescription;
+  }
+
   Widget _buildInfoMessage(IconData icon, String title, String msg) {
     return Card(
       color: const Color(0xFF162A3E),
@@ -331,7 +356,7 @@ class _PermitDetailScreenState extends State<PermitDetailScreen> {
                 children: [
                   const Text('Work Description', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
                   const SizedBox(height: 8),
-                  _buildJsonOrText(p.workDescription),
+                  _buildJsonOrText(_prettyDescription(p)),
                   if (p.hazardIdentification?.isNotEmpty == true) ...[
                     const SizedBox(height: 16),
                     const Text('Detailed Information / Safety Checklist', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),

@@ -130,14 +130,20 @@ class _HomeScreenState extends State<HomeScreen> {
         title: Row(
           children: [
             Container(
-              padding: const EdgeInsets.all(6),
+              padding: const EdgeInsets.all(4),
               decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [Color(0xFF1E3A5F), Color(0xFF4FC3F7)],
-                ),
-                borderRadius: BorderRadius.circular(8),
+                color: const Color(0xFF1E3A5F),
+                borderRadius: BorderRadius.circular(10),
               ),
-              child: const Icon(Icons.work_outline, size: 20, color: Colors.white),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Image.asset(
+                  'assets/logo.png',
+                  width: 24,
+                  height: 24,
+                  fit: BoxFit.contain,
+                ),
+              ),
             ),
             const SizedBox(width: 12),
             if (isWide)

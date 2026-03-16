@@ -103,6 +103,32 @@ class PdfService {
 
   // ======================== BASIC INFO TABLE ========================
 
+  static String _formatDescription(Permit permit) {
+    if (permit.permitType == 'hot_work') {
+      try {
+        final raw = permit.hazardIdentification;
+        if (raw != null && raw.isNotEmpty) {
+          final decoded = jsonDecode(raw);
+          if (decoded is Map<String, dynamic>) {
+            final contractor = (decoded['contractor'] ?? '').toString().trim();
+            final applicant = (decoded['applicant'] ?? '').toString().trim();
+            final who = contractor.isNotEmpty
+                ? contractor
+                : (applicant.isNotEmpty ? applicant : (permit.applicantName ?? ''));
+            final location = permit.workLocation;
+            if (who.isNotEmpty) {
+              return 'Hot work at $location by $who';
+            }
+            return 'Hot work at $location';
+          }
+        }
+      } catch (_) {
+        // fall through to default text
+      }
+    }
+    return permit.workDescription;
+  }
+
   static pw.Widget _buildBasicInfoTable(Permit permit) {
     return pw.Table(
       border: pw.TableBorder.all(color: PdfColors.grey300),
@@ -118,7 +144,7 @@ class PdfService {
         _tableRow('Location', permit.workLocation),
         _tableRow('Start Date', _dateFormat.format(permit.startDate)),
         _tableRow('End Date', _dateFormat.format(permit.endDate)),
-        _tableRow('Description', permit.workDescription),
+        _tableRow('Description', _formatDescription(permit)),
       ],
     );
   }

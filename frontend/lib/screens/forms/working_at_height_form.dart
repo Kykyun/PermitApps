@@ -6,7 +6,7 @@ import 'dart:typed_data';
 import 'package:file_picker/file_picker.dart';
 import '../../providers/permit_provider.dart';
 import '../../providers/auth_provider.dart';
-import '../../widgets/signature_pad.dart';
+import '../../widgets/user_signature_field.dart';
 
 class WorkingAtHeightForm extends StatefulWidget {
   const WorkingAtHeightForm({super.key});
@@ -375,7 +375,10 @@ class _WorkingAtHeightFormState extends State<WorkingAtHeightForm> {
                             children: [
                               const Text('Tanda tangan Pelaksana Pekerjaan', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11)),
                               Row(children: [Expanded(child: _buildTextField('Nama', _pelaksanaNameCtrl, fontSize: 11)), const SizedBox(width: 8), Expanded(child: _buildTextField('Jabatan', _pelaksanaJabatanCtrl, fontSize: 11))]),
-                              SignaturePadWidget(title: 'Tanda tangan', onSaved: (s) => _pelaksanaSig = s),
+                              UserSignatureField(
+                                title: 'Signature',
+                                onChanged: (s) => _pelaksanaSig = s,
+                              ),
                             ],
                           ),
                         ),
@@ -448,7 +451,10 @@ class _WorkingAtHeightFormState extends State<WorkingAtHeightForm> {
                             children: [
                               const Text('Tanda tangan Pelaksana Pekerjaan', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11)),
                               Row(children: [Expanded(child: _buildTextField('Nama', _finishPelaksanaNameCtrl, isRequired: false, fontSize: 11)), const SizedBox(width: 8), Expanded(child: _buildTextField('Jabatan', _finishPelaksanaJabatanCtrl, isRequired: false, fontSize: 11))]),
-                              SignaturePadWidget(title: 'Tanda tangan', onSaved: (s) => _finishPelaksanaSig = s),
+                              UserSignatureField(
+                                title: 'Signature',
+                                onChanged: (s) => _finishPelaksanaSig = s,
+                              ),
                             ],
                           ),
                         ),

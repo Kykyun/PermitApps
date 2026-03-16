@@ -156,7 +156,7 @@ class PdfService {
 
   // ======================== CHECKLIST TABLE ========================
 
-  static pw.Widget _buildChecklistTable(String title, Map<String, dynamic> items) {
+  static pw.Widget _buildChecklistTable(String title, Map<String, dynamic> items, {bool slashStyle = false}) {
     return pw.Column(
       crossAxisAlignment: pw.CrossAxisAlignment.start,
       children: [
@@ -174,18 +174,24 @@ class PdfService {
               children: [
                 _headerCell('No'),
                 _headerCell('Item'),
-                _headerCell('Status'),
+                _headerCell(slashStyle ? '/' : 'Status'),
               ],
             ),
             ...items.entries.toList().asMap().entries.map((e) {
               final idx = e.key + 1;
               final item = e.value;
               final checked = item.value == true;
+              final statusText = slashStyle
+                  ? (checked ? '/' : '')
+                  : (checked ? '✓' : '✗');
+              final statusColor = slashStyle
+                  ? PdfColors.black
+                  : (checked ? PdfColors.green800 : PdfColors.red);
               return pw.TableRow(
                 children: [
                   _cell('$idx'),
                   _cell(item.key),
-                  _cell(checked ? '✓' : '✗', align: pw.TextAlign.center, bold: true, color: checked ? PdfColors.green800 : PdfColors.red),
+                  _cell(statusText, align: pw.TextAlign.center, bold: true, color: statusColor),
                 ],
               );
             }),
@@ -346,7 +352,11 @@ class PdfService {
 
     // Safety Checks
     if (data['safety_checks'] is Map) {
-      widgets.add(_buildChecklistTable('Safety Checks', Map<String, dynamic>.from(data['safety_checks'])));
+      widgets.add(_buildChecklistTable(
+        'Safety Checks',
+        Map<String, dynamic>.from(data['safety_checks']),
+        slashStyle: true,
+      ));
     }
 
     // Gas Testing
@@ -400,12 +410,20 @@ class PdfService {
 
     // Safety Certificates
     if (data['safety_certificates'] is Map) {
-      widgets.add(_buildChecklistTable('Safety Certificates', Map<String, dynamic>.from(data['safety_certificates'])));
+      widgets.add(_buildChecklistTable(
+        'Safety Certificates',
+        Map<String, dynamic>.from(data['safety_certificates']),
+        slashStyle: true,
+      ));
     }
 
     // Hazard Identification
     if (data['hazards'] is Map) {
-      widgets.add(_buildChecklistTable('Hazard Identification', Map<String, dynamic>.from(data['hazards'])));
+      widgets.add(_buildChecklistTable(
+        'Hazard Identification',
+        Map<String, dynamic>.from(data['hazards']),
+        slashStyle: true,
+      ));
     }
 
     // Safety Checks

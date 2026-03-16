@@ -98,13 +98,9 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                 children: [
                   // Logo
                   Container(
-                    padding: const EdgeInsets.all(20),
+                    padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFF1E3A5F), Color(0xFF4FC3F7)],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
+                      color: const Color(0xFF1E3A5F),
                       borderRadius: BorderRadius.circular(20),
                       boxShadow: [
                         BoxShadow(
@@ -114,7 +110,15 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                         ),
                       ],
                     ),
-                    child: const Icon(Icons.work_outline, size: 48, color: Colors.white),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(16),
+                      child: Image.asset(
+                        'assets/logo.png',
+                        width: 72,
+                        height: 72,
+                        fit: BoxFit.contain,
+                      ),
+                    ),
                   ),
                   const SizedBox(height: 24),
                   Text(

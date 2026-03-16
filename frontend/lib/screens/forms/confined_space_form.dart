@@ -4,8 +4,8 @@ import 'package:provider/provider.dart';
 import 'dart:convert';
 import 'dart:typed_data';
 import '../../providers/permit_provider.dart';
-import '../../providers/auth_provider.dart';
 import '../../widgets/signature_pad.dart';
+import '../../widgets/user_signature_field.dart';
 
 class ConfinedSpaceForm extends StatefulWidget {
   const ConfinedSpaceForm({super.key});
@@ -441,7 +441,10 @@ class _ConfinedSpaceFormState extends State<ConfinedSpaceForm> {
                       _buildSectionHeader('G. PEMBERI IZIN (MANAGER)'),
                       _buildTextField('Nama', _managerNameCtrl, isRequired: false),
                       _buildTextField('Jabatan', _managerPositionCtrl, isRequired: false),
-                      SignaturePadWidget(title: 'Tanda Tangan', onSaved: (s) => _managerSig = s),
+                      UserSignatureField(
+                        title: 'Signature',
+                        onChanged: (s) => _managerSig = s,
+                      ),
                     ],
                   ),
                 ),
@@ -452,7 +455,10 @@ class _ConfinedSpaceFormState extends State<ConfinedSpaceForm> {
                       _buildSectionHeader('H. DISETUJUI OLEH AGT'),
                       _buildTextField('Nama', _agtNameCtrl, isRequired: false),
                       _buildTextField('No. AGTES', _agtNoCtrl, isRequired: false),
-                      SignaturePadWidget(title: 'Tanda Tangan', onSaved: (s) => _agtSig = s),
+                      UserSignatureField(
+                        title: 'Signature',
+                        onChanged: (s) => _agtSig = s,
+                      ),
                     ],
                   ),
                 ),
@@ -470,7 +476,10 @@ class _ConfinedSpaceFormState extends State<ConfinedSpaceForm> {
                     children: [
                       Container(color: Colors.green.shade600, width: double.infinity, padding: const EdgeInsets.all(4), child: const Text('ENTRY SUPERVISOR', style: TextStyle(fontSize: 11, color: Colors.white, fontWeight: FontWeight.bold))),
                       _buildTextField('Nama Supervisor', _supervisorNameCtrl),
-                      SignaturePadWidget(title: 'Tanda Tangan', onSaved: (s) => _supervisorSig = s),
+                      UserSignatureField(
+                        title: 'Signature',
+                        onChanged: (s) => _supervisorSig = s,
+                      ),
                     ],
                   ),
                 ),
@@ -480,7 +489,10 @@ class _ConfinedSpaceFormState extends State<ConfinedSpaceForm> {
                     children: [
                       Container(color: Colors.green.shade600, width: double.infinity, padding: const EdgeInsets.all(4), child: const Text('PEMBERI IZIN (AHLI K3)', style: TextStyle(fontSize: 11, color: Colors.white, fontWeight: FontWeight.bold))),
                       _buildTextField('Nama Ahli K3', _k3NameCtrl, isRequired: false),
-                      SignaturePadWidget(title: 'Tanda Tangan', onSaved: (s) => _k3Sig = s),
+                      UserSignatureField(
+                        title: 'Signature',
+                        onChanged: (s) => _k3Sig = s,
+                      ),
                     ],
                   ),
                 ),

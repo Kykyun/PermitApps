@@ -7,6 +7,7 @@ import 'permit_list_screen.dart';
 import 'permit_form_screen.dart';
 import 'notification_screen.dart';
 import 'user_management_screen.dart';
+import 'signature_settings_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -80,6 +81,22 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
             ),
+          InkWell(
+            onTap: () {
+              setState(() => _userMenuExpanded = false);
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const SignatureSettingsScreen()));
+            },
+            child: const Padding(
+              padding: EdgeInsets.symmetric(vertical: 8),
+              child: Row(
+                children: [
+                  Icon(Icons.brush, size: 18, color: Colors.white),
+                  SizedBox(width: 8),
+                  Text('Signature Settings'),
+                ],
+              ),
+            ),
+          ),
           InkWell(
             onTap: () {
               setState(() => _userMenuExpanded = false);

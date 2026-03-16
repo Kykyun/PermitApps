@@ -6,6 +6,7 @@ import 'dart:typed_data';
 import '../../providers/permit_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../widgets/signature_pad.dart';
+import '../../widgets/user_signature_field.dart';
 
 class HotWorkForm extends StatefulWidget {
   const HotWorkForm({super.key});
@@ -101,8 +102,6 @@ class _HotWorkFormState extends State<HotWorkForm> {
   });
   final _gasIntervalCtrl = TextEditingController();
   final _gasNameCtrl = TextEditingController();
-  Uint8List? _gasTesterSig;
-
   bool _gasCalibrated = false;
   bool _blowerAvailable = false;
   bool _additionalCS = false;
@@ -192,9 +191,29 @@ class _HotWorkFormState extends State<HotWorkForm> {
       }
     };
 
+    // Build a clean, human‑readable description instead of dumping raw JSON
+    final selectedJobTypes = _jobTypes.entries
+        .where((e) => e.value)
+        .map((e) => e.key)
+        .toList();
+
+    final jobText = selectedJobTypes.isNotEmpty
+        ? selectedJobTypes.join(', ')
+        : 'Pekerjaan hot work';
+
+    final locationText = _locationCtrl.text.trim().isNotEmpty
+        ? _locationCtrl.text.trim()
+        : 'lokasi kerja';
+
+    final contractorText = _contractorCtrl.text.trim().isNotEmpty
+        ? ' oleh ${_contractorCtrl.text.trim()}'
+        : '';
+
+    final description = '$jobText di $locationText$contractorText';
+
     final data = {
       'permit_type': 'hot_work',
-      'work_description': 'Hot Work di $details',
+      'work_description': description,
       'work_location': _locationCtrl.text.trim(),
       'start_date': _startDate.toIso8601String(),
       'end_date': _endDate.toIso8601String(),
@@ -208,8 +227,6 @@ class _HotWorkFormState extends State<HotWorkForm> {
 
     if (permit != null) {
       if (_spvSig != null) await provider.uploadDocumentBytes(permit.id, _spvSig!, 'supervisor_sig.png');
-      if (_gasTesterSig != null) await provider.uploadDocumentBytes(permit.id, _gasTesterSig!, 'agt_sig.png');
-      
       int c = 1;
       for (var g in _gasChecks.where((e) => e['sig'] != null)) {
         await provider.uploadDocumentBytes(permit.id, g['sig'] as Uint8List, 'gas_check_${c}_sig.png');
@@ -421,14 +438,13 @@ class _HotWorkFormState extends State<HotWorkForm> {
                       _buildSectionHeader('GAS TEST'),
                       _buildTextField('Jarak waktu tes', _gasIntervalCtrl, isRequired: false),
                       _buildTextField('Nama petugas (AGT)', _gasNameCtrl, isRequired: false),
-                      SignaturePadWidget(title: 'Ttd Penguji Gas', onSaved: (s) => _gasTesterSig = s),
                     ],
                   ),
                 ),
               ],
             ),
 
-            const SizedBox(height: 16),
+                      const SizedBox(height: 16),
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -437,7 +453,11 @@ class _HotWorkFormState extends State<HotWorkForm> {
                     children: [
                       Container(color: Colors.red.shade700, width: double.infinity, padding: const EdgeInsets.all(4), child: const Text('Dibuat Oleh: SUPERVISOR', style: TextStyle(fontSize: 11, color: Colors.white, fontWeight: FontWeight.bold))),
                       _buildTextField('Nama', _spvNameCtrl),
-                      SignaturePadWidget(title: 'Tanda Tangan', onSaved: (s) => _spvSig = s),
+                      const SizedBox(height: 4),
+                      UserSignatureField(
+                        title: 'Signature',
+                        onChanged: (s) => _spvSig = s,
+                      ),
                     ],
                   ),
                 ),
